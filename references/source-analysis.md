@@ -65,3 +65,40 @@ When the learner gives a topic + a repo + materials, the rule is: **topic provid
 - Stage 0 produces a topic-shaped outline.
 - For each chapter, prefer concrete examples drawn from the repo (with file:line citations) or from the materials (with attribution).
 - If the repo/materials don't cover a chapter the topic skeleton calls for, write that chapter from general domain knowledge and say so.
+
+---
+
+## Repo onboarding detection (for the `repo-expert` goal)
+
+When the learner's goal (asked at Stage 0.5) is **`repo-expert`**, the book is about *the repo itself*. The outline becomes a Repository Onboarding arc. At Stage 0, scan the repo for the artifacts below and **only include a chapter for artifacts that actually exist**. Don't fabricate a "DB schema" chapter for a repo with no database.
+
+Each onboarding chapter still goes through the normal per-chapter assessment loop (Stage 2a–2e): ask scenario questions about, say, the data flow before writing that chapter, calibrate depth, and ship a test.
+
+| Artifact | Detection signals | What the chapter teaches |
+|---|---|---|
+| **Architecture overview** | always (from README + tree) | The mental model, subsystem map, layering. What's where, and why. |
+| **DB schema** | ORM model files (`models/`, `app/models/`), migration dirs (`migrations/`, `db/migrate/`), `schema.sql`, `prisma/schema.prisma`, `*.prisma` | Entities, relationships (an inline SVG ER sketch), key constraints, how migrations flow. |
+| **Core services / modules** | top-level `services/`, `controllers/`, `modules/`, `pkg/`, `internal/` dirs | What each service/module does, its public API, how others call it. |
+| **Core data flow** | HTTP route handlers, event/message brokers (Kafka, RabbitMQ, Redis pub/sub), job queues (Sidekiq, Celery, Bull) | One canonical request traced end-to-end; an inline SVG flow diagram; message/event flow. |
+| **Key domain concepts** | domain model files, a glossary in docs, ubiquitous language | The vocabulary a contributor needs to read the code and the conversations. |
+| **API surface** | `openapi.yaml`/`swagger.json`, route definitions, a `public/` or exported API module | The contract the repo exposes to the outside world; what's stable vs internal. |
+| **Dev environment** | README setup section, `Dockerfile`/`docker-compose.yml`, `Makefile`, `package.json` scripts, `.env.example` | How to run it locally; the non-obvious traps (which env vars matter, which services must be up). |
+| **Contributing map** | `CONTRIBUTING.md`, issue/PR templates, test layout (`tests/`, `__tests__/`, `*_test.go`) | Where to make a first change; how tests are organized and run; the review conventions. |
+
+### How to detect
+
+- `ls` the top-level and the obvious subdirs. Don't recurse blindly — go one or two levels deep.
+- `grep` for telltale filenames and patterns: `schema.sql`, `*.prisma`, `class.*< ApplicationRecord`, `CREATE TABLE`, `async def` + `celery`, `@app.route`/`@Controller`/`router.`, `kafka`/`rabbitmq` in deps files.
+- Read the deps manifest (`package.json`, `requirements.txt`/`pyproject.toml`, `go.mod`, `Cargo.toml`, `Gemfile`) — it tells you which categories apply (is there an ORM? a message broker? a web framework?).
+- Read the README's setup section for the dev-environment chapter.
+
+### What to record at Stage 0
+
+Produce a short artifact inventory: "This repo has: DB schema (Postgres via Prisma), core services (3 services under `services/`), data flow (REST + a Redis queue), API surface (OpenAPI), dev env (docker-compose). It does NOT have: an event broker beyond Redis, a CONTRIBUTING.md." This inventory drives the Stage 1 outline.
+
+### Outlines for the two goals, at a glance
+
+- **`domain-expert`** outline: foundations → core mechanisms → advanced → applied. The repo (if any) supplies examples, not structure.
+- **`repo-expert`** outline: architecture overview → (detected onboarding artifacts in dependency order: schema before services that use it, services before data flow) → key domain concepts → API surface → dev environment → contributing map.
+
+The `repo-expert` arc roughly mirrors how a new engineer onboards onto a codebase: *where am I → what's the data → what are the pieces → how does a request move through them → how do I run it → how do I change it.*

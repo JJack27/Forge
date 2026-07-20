@@ -1,0 +1,74 @@
+{
+  "title": "1. Chapter Title",
+  "objectives": [
+    "Objective 1",
+    "Objective 2"
+  ],
+  "bodyHtml": "<p>Chapter content goes here. This field is pre-rendered HTML, injected as-is.</p><section id=\"sec-example-slug\"><h3>Subsection</h3><p>Subsection content. Note the <em>id</em> — it is the anchor that test review links jump to. Anchors are language-neutral (same id across all languages) so review links work everywhere.</p></section><pre><code>// example code block\nfn main() {}</code></pre>",
+  "pitfallsHtml": "<p>Common pitfalls, contrasts with adjacent concepts, and further reading go here.</p>",
+  "test": {
+    "passThreshold": 80,
+    "questions": [
+      {
+        "type": "mcq",
+        "prompt": "Multiple-choice (single-select). Prompt text goes here?",
+        "options": [
+          { "value": "a", "label": "A. Option A" },
+          { "value": "b", "label": "B. Option B (correct)" },
+          { "value": "c", "label": "C. Option C" }
+        ],
+        "correct": ["b"],
+        "answer": "B. Option B.",
+        "rationale": "Explain why B is right, and why each distractor is wrong (the misconception each one tests).",
+        "review": "sec-example-slug"
+      },
+      {
+        "type": "mcq",
+        "prompt": "Multi-select (select all that apply). Which of these are true?",
+        "multiSelect": true,
+        "options": [
+          { "value": "a", "label": "A. First true statement" },
+          { "value": "b", "label": "B. A false statement" },
+          { "value": "c", "label": "C. Second true statement" }
+        ],
+        "correct": ["a", "c"],
+        "answer": "A and C.",
+        "rationale": "All-and-only the correct options are required for the point.",
+        "review": "sec-example-slug"
+      },
+      {
+        "type": "fill",
+        "prompt": "Fill-in (single blank). Rust's core memory-safety concept is ____.",
+        "blanks": 1,
+        "placeholders": ["answer"],
+        "accepted": ["ownership", "borrowing"],
+        "answer": "ownership (or: borrowing — both accepted).",
+        "rationale": "Provide every equivalent phrasing in `accepted`; the scorer normalizes (trim, lowercase, collapse whitespace).",
+        "review": "sec-example-slug"
+      },
+      {
+        "type": "fill",
+        "prompt": "Fill-in (multi-blank, order-tolerant). The two phases are ____ and ____.",
+        "blanks": 2,
+        "placeholders": ["first", "second"],
+        "accepted": ["analysis", "synthesis"],
+        "answer": "analysis and synthesis.",
+        "rationale": "Multi-blank is order-tolerant: each value must be in `accepted`, no duplicates, all filled.",
+        "review": "sec-example-slug"
+      },
+      {
+        "type": "short",
+        "prompt": "Short-answer (self-checked key points). In your own words, why does this design fail under condition Z?",
+        "keyPoints": [
+          "identifies that the failure is caused by X",
+          "names the underlying mechanism (the Y rule)",
+          "proposes the standard fix (Z pattern)",
+          "notes the trade-off the fix introduces"
+        ],
+        "answer": "Reference answer: the design fails because of X; the underlying mechanism is Y; the standard fix is Z, which introduces the trade-off of …",
+        "rationale": "Score = (points you honestly self-check) / (total points). Keep the honesty framing in mind.",
+        "review": "sec-example-slug"
+      }
+    ]
+  }
+}

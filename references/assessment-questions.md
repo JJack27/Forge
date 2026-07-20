@@ -59,6 +59,18 @@ Watch for these tells:
 
 If the learner's answer is ambiguous, you may ask one short follow-up to disambiguate before tagging. Don't interrogate — one follow-up max.
 
+## Questions for repo-onboarding chapters (repo-expert goal)
+
+When the goal is `repo-expert`, the same scenario-question principles apply — just aimed at the repo's artifacts rather than abstract concepts. Examples by chapter:
+
+- **Architecture:** "I want to add a feature that sends a notification when X happens. Walk me through which subsystems I'd touch and why."
+- **DB schema:** "Two records need to share a one-to-many relationship where the children are ordered. Given the existing tables [A, B], where does the ordering live and why? What goes wrong if you put it in the wrong place?"
+- **Core services:** "Service A calls Service B. Service B is down. What happens to a request that hits Service A? Trace the failure."
+- **Data flow:** "A user submits form X. Trace the request from the router to the database write. Where does it cross a process boundary? Where could it silently lose data?"
+- **Dev environment:** "You clone the repo, run the setup, and `make test` fails with error Y. What are the top 2 likely causes?"
+
+The point is the same: force applied reasoning, not vocabulary recall. A learner who can recite "we use Postgres" but can't trace a foreign key isn't ready to skip the schema chapter.
+
 ## After scoring
 
 Briefly tell the learner what you found, before writing the chapter. Example:

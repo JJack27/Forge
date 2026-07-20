@@ -1,0 +1,7 @@
+{
+  "title": "{{BOOK TITLE}}",
+  "subtitle": "{{subtitle — e.g. \"A personalized learning book, calibrated to your level.\"}}",
+  "chapters": [
+    { "id": "ch-1", "chapter": "1", "title": "1. Chapter Title", "file": "ch-01.json" }
+  ]
+}

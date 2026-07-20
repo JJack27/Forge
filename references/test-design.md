@@ -38,11 +38,22 @@ This is the type that most rewards understanding and most resists gaming. Struct
 - The learner self-checks each point: "only check a point if you actually addressed it — under-checking hurts the book's calibration, over-checking only fools yourself." Score for the question = (checked points) / (total points).
 - This honesty framing matters. Put it above every short-answer checklist, not buried in help text.
 
+## Where test data lives
+
+In the multi-file project, each chapter's test lives in `content/<lang>/ch-XX.json` under `test.questions`. The **scoring logic is language-neutral** (it reads `data-*` attributes off the rendered DOM), so when you translate a chapter:
+
+- Keep the same number of questions, same types, same order.
+- Keep `correct` (mcq value tokens) and `accepted` (fill) **identical across languages**, unless an `accepted` answer is a natural-language term — then translate its acceptable forms.
+- Keep the `keyPoints` count identical for short-answer questions.
+
+See `references/i18n.md` for the full invariant.
+
 ## Scoring
 
 - Every question is worth equal points by default. (Weighting tends to confuse learners and rarely reflects anything real.)
 - Test score = (points earned) / (points possible), as a percentage.
 - Chapter is "learned enough to move forward" at **≥ 80%**. This threshold is the skill's core promise — don't fudge it.
+- Scores persist per language: `localStorage` key `book:<slug>:<lang>:ch:<n>`. Passing the English test doesn't mark the Chinese test as passed — they're separate certifications.
 
 ## Weighting toward weak points
 
