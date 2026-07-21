@@ -1,175 +1,267 @@
 # Project Structure
 
-The book is a **multi-file static web project**, not a single HTML file. Start from `assets/book-template/` and fill in the locale + content files per chapter per language. Do not build the project from scratch — the template already has the shell, CSS, locale loader, scoring, and dashboard wired.
+The book is a **multi-file static HTML project**: one self-contained `.html` file per chapter, plus an `index.html` dashboard, all sharing a single `assets/` folder per language. No build step, no server, no `fetch()` — every chapter works opened directly via `file://`. Start from `assets/book-template/` (which ships `en/` with one example chapter) and fill in the real chapters.
 
-## Why multi-file (and why it must be served over HTTP)
+## Why HTML-per-chapter (and why it works under `file://`)
 
-Each chapter and each language lives in its own JSON file, loaded at runtime. This keeps the project maintainable (one file per chapter, not a 50,000-line HTML monster) and makes i18n a first-class concern. The trade-off: the browser cannot `fetch()` local files under `file://`, so the project **must be served over HTTP**. The template ships `start.sh` which starts a static server and opens the browser; or the learner can run `python3 -m http.server` in the project directory. Stage 4 (deliver) tells the learner this clearly.
+Each chapter is fully self-contained: the `<head>` links to the shared stylesheet (`assets/style.css`), and the closing `<script src="assets/book.js" defer>` pulls in the scoring/nav/dashboard logic. There is no runtime loading of chapter content — what you see in the file IS the chapter. That means a learner can double-click any `.html` file and it works, with no HTTP server and no internet. Language switching is just a hyperlink to a sibling file in another folder (`<a class="lang-toggle" href="../zh/01-…html">`).
 
 ## Project layout
 
 ```
 <book-project>/
-├── index.html              # shell: nav (TOC + lang switcher), dashboard, #app mount point
-├── start.sh                # launches a static server and opens the browser
-├── css/
-│   └── book.css            # all styles (includes .viz-container, .viz-error, responsive SVG)
-├── js/
-│   ├── vendor/
-│   │   └── d3.min.js       # vendored D3 v7 (loaded before app scripts; no external requests)
-│   ├── i18n.js             # locale loader + t() lookup + language switch
-│   ├── scoring.js          # mcq/fill/short scoring (language-neutral)
-│   ├── dashboard.js        # TOC + progress + per-language score persistence
-│   ├── viz.js              # visualization runner (mountViz, runInteractiveCheck, helpers)
-│   └── main.js             # bootstrap: load locale + meta + chapters, render, wire events,
-│                           #   mount chapter viz[] + interactive questions (set BOOK_SLUG here!)
-├── locales/
-│   ├── en.json             # UI strings for English
-│   └── <lang>.json         # one file per language, SAME key set
-└── content/
-    └── <lang>/
-        ├── meta.json       # book title, subtitle, ordered chapter manifest
-        ├── ch-01.json      # one chapter per file (may include a viz[] array)
-        └── ch-XX.json
+├── <primary-lang>/                    ← one folder per language; "en" is typical primary
+│   ├── index.html                     ← dashboard / TOC (the page learners open first)
+│   ├── 01-…-slug.html                 ← one self-contained HTML per chapter
+│   ├── 02-…-slug.html
+│   └── …
+│   └── assets/
+│       ├── style.css                  ← dark-cyan theme (shared verbatim across languages)
+│       └── book.js                    ← scoring + nav + dashboard + demos registry (shared verbatim)
+└── <other-lang>/                      ← e.g. zh/, added in Stage 4.5
+    ├── index.html
+    ├── 01-…-slug.html
+    └── assets/                        ← byte-identical copy of <primary-lang>/assets/
 ```
 
-## What the skill fills in
+Per-language `assets/` folders are byte-identical copies. Don't per-language customize `book.js` or `style.css` — if you need a change, it applies to all languages.
 
-You almost never touch `index.html`, `css/`, or `js/`. You write:
+## Chapter HTML anatomy
 
-1. **`locales/<lang>.json`** — UI strings. The template ships `en.json` with the full UI key set; copy it per language and translate values. (See `i18n.md`.)
-2. **`content/<lang>/meta.json`** — book title, subtitle, and the ordered chapter manifest (`id`, `chapter`, `title`, `file`).
-3. **`content/<lang>/ch-XX.json`** — one file per chapter, per language.
-4. **`js/main.js`** — set `BOOK_SLUG` to a unique kebab-case id for the book (used as the localStorage prefix).
+Every chapter mirrors the canonical reference at `assets/book-template/en/01-example-chapter.html`. The structure (in order):
 
-## Content file schema (a chapter)
+```html
+<!doctype html>
+<html lang="en">                                 <!-- ← per-language -->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter N — Title</title>
+<link rel="stylesheet" href="assets/style.css">  <!-- single stylesheet -->
+</head>
+<body>
 
-```json
-{
-  "title": "3. Ownership and Borrowing",
-  "objectives": ["objective 1", "objective 2"],
-  "bodyHtml": "<p>Pre-rendered HTML, injected as-is.</p><section id=\"sec-ownership-rules\"><h3>…</h3><p>…</p></section>",
-  "pitfallsHtml": "<p>Optional. Pitfalls, contrasts, further reading.</p>",
-  "viz": [
-    { "type": "diagram", "slug": "er-ownership", "caption": "Optional.", "code": "/* D3 code; see visualizations.md */" }
-  ],
-  "test": {
-    "passThreshold": 80,
-    "questions": [ /* see below */ ]
-  }
-}
+<div class="topbar">
+  <a href="index.html" class="brand">◆ MY BOOK</a>
+  <span class="crumb">Chapter N · Short title</span>
+  <span class="spacer"></span>
+  <nav class="chapter-nav"></nav>                <!-- filled by book.js: prev / Contents / next -->
+  <a class="lang-toggle" href="../zh/01-…html">中文 →</a>
+</div>
+
+<main class="chapter" data-chapter-n="1">
+<script>window.BOOK_CONFIG = { slug: "my-book", lang: "en", chapters: […] };</script>
+
+  <div class="chapter-header">
+    <div class="eyebrow">Chapter 1 · Foundations</div>
+    <h1>Chapter title</h1>
+    <p class="lede">One-paragraph orientation.</p>
+  </div>
+
+  <div class="box objectives">
+    <div class="box-title">Learning objectives</div>
+    <ul><li>…</li><li>…</li></ul>
+  </div>
+
+  <h2 id="sec-main-concept">1.1 The main concept</h2>
+  <p>…</p>
+  <!-- Inline SVG diagram: -->
+  <figure class="diagram"><svg viewBox="0 0 820 400">…</svg><figcaption>…</figcaption></figure>
+  <!-- Interactive demo: -->
+  <div class="demo" data-demo="myDemo">
+    <div class="demo-title">Try it — …</div>
+    <p>…</p>
+    <button data-run>Run</button>
+    <div class="demo-output empty">Click to run.</div>
+  </div>
+
+  <h2 id="sec-recap">1.N Recap</h2>
+  <ul><li>…</li></ul>
+
+  <div class="box pitfalls">
+    <div class="box-title">Common pitfalls</div>
+    <ul><li>…</li></ul>
+  </div>
+
+  <form class="test" data-chapter="1">
+    <h2>Chapter 1 Test</h2>
+    <!-- one <div class="q"> per question; see schemas below -->
+    <button type="submit" class="submit-test">Submit test</button>
+    <div class="test-result"></div>
+    <button type="button" class="retake-btn" hidden>Retake test</button>
+  </form>
+
+  <p style="margin-top:2rem;">Next: <a href="02-…html"><strong>Chapter 2 — …</strong></a>.</p>
+
+</main>
+
+<script src="assets/book.js" defer></script>
+</body>
+</html>
 ```
 
-- `bodyHtml` and `pitfallsHtml` are **trusted pre-rendered HTML** injected as-is. You author them. Use `<section id="sec-<slug>">` for subsections — the `id` is the anchor that test review links jump to.
-- Anchors are **language-neutral**: the same `sec-ownership-rules` id appears in `content/en/ch-03.json` and `content/zh/ch-03.json`. The prose differs; the id does not. (See `i18n.md`.)
-- `viz[]` is optional. Each entry's `code` is raw D3 JavaScript run at render time; see `references/visualizations.md` for the full contract. To place a viz at a specific spot in the body, leave a `<div data-viz="<slug>"></div>` placeholder in `bodyHtml` — otherwise vizs append to the body in array order.
+### Critical conventions
 
-## Question schemas
+- **`<html lang="…">`** matches the language folder (`en`, `zh-CN`, `es`, etc.).
+- **`<main class="chapter" data-chapter-n="N">`** — the `data-chapter-n` attribute tells `book.js` which chapter this is (drives prev/next nav + the `localStorage` key).
+- **Inline `<script>window.BOOK_CONFIG = …</script>`** — the same object on every page. `book.js` reads it (overriding its built-in defaults) to know the book's slug, lang, and ordered chapters list. At minimum set `slug` (kebab-case, unique per book), `lang` (matches the folder), and `chapters` (ordered list of `{n, slug}`).
+- **Section ids (`id="sec-…"`)** are language-neutral anchors that test `data-review` values point to. Don't translate them — the same id appears in every language's copy of the chapter.
+- **`data-*` attributes on test questions are JSON arrays wrapped in single quotes** (`data-correct='["b"]'`). Inside the JSON, use double quotes. Never put an unescaped `"` inside a JSON string value.
 
-Three types. Every question has `type`, `prompt` (plain) or `promptHtml` (HTML, used when the prompt contains code), `answer` (revealed after submit), `rationale`, and `review` (the subsection anchor).
+## Test question schemas
 
-### mcq (single-select by default)
+Three types. Every question is a `<div class="q" …>` inside `<form class="test">`.
 
-```json
-{
-  "type": "mcq",
-  "prompt": "Prompt text?",
-  "options": [
-    { "value": "a", "label": "A. Option A" },
-    { "value": "b", "label": "B. Option B (correct)" }
-  ],
-  "correct": ["b"],
-  "answer": "B. …",
-  "rationale": "Why B; why the distractors are wrong.",
-  "review": "sec-ownership-rules"
-}
+### mcq (single-select)
+
+```html
+<div class="q" data-id="1-1" data-type="mcq" data-correct='["b"]'
+     data-answer="B — the answer."
+     data-rationale="Why B; why each distractor is wrong."
+     data-review="sec-main-concept">
+  <div class="prompt"><span class="qnum">Q1.</span> Question text?</div>
+  <label class="opt"><input type="radio" name="q-1-1" value="a"> A. Option A</label>
+  <label class="opt"><input type="radio" name="q-1-1" value="b"> B. Option B</label>
+  <label class="opt"><input type="radio" name="q-1-1" value="c"> C. Option C</label>
+  <div class="feedback"></div>
+</div>
 ```
 
 ### mcq (multi-select)
 
-Add `"multiSelect": true`. Correct = all-and-only the options in `correct`.
+Add `data-multiselect="true"`, use checkboxes, all-and-only correct for the point:
 
-### fill (single blank)
-
-```json
-{
-  "type": "fill",
-  "prompt": "Rust's core memory-safety concept is ____.",
-  "blanks": 1,
-  "placeholders": ["answer"],
-  "accepted": ["ownership", "borrowing"],
-  "answer": "ownership (or borrowing).",
-  "rationale": "Provide every equivalent phrasing; the scorer normalizes (trim, lowercase, collapse whitespace).",
-  "review": "sec-ownership-rules"
-}
+```html
+<div class="q" data-id="1-2" data-type="mcq" data-multiselect="true" data-correct='["a","c"]' …>
+  <div class="prompt"><span class="qnum">Q2.</span> Which are true? <em>Select all that apply.</em></div>
+  <label class="opt"><input type="checkbox" name="q-1-2" value="a"> A. …</label>
+  <label class="opt"><input type="checkbox" name="q-1-2" value="b"> B. …</label>
+  <label class="opt"><input type="checkbox" name="q-1-2" value="c"> C. …</label>
+  <div class="feedback"></div>
+</div>
 ```
 
-### fill (multi-blank, order-tolerant)
+### fill (single- or multi-blank)
 
-```json
-{
-  "type": "fill",
-  "prompt": "The two phases are ____ and ____.",
-  "blanks": 2,
-  "placeholders": ["first", "second"],
-  "accepted": ["analysis", "synthesis"],
-  "answer": "analysis and synthesis.",
-  "rationale": "Multi-blank is order-tolerant: each value must be in `accepted`, no duplicates, all filled.",
-  "review": "sec-phases"
-}
+```html
+<div class="q" data-id="1-3" data-type="fill" data-accepted='["answer1","answer2","answer 3"]'
+     data-answer="answer1 (or answer2)."
+     data-rationale="…"
+     data-review="sec-…">
+  <div class="prompt"><span class="qnum">Q3.</span> Fill the blank: the value is ____.</div>
+  <input type="text" class="fill">
+  <div class="feedback"></div>
+</div>
 ```
+
+For multi-blank, add multiple `<input type="text" class="fill">` elements. Scoring is order-tolerant: each filled value must be in `accepted`, no duplicates, all filled.
 
 ### short (self-checked key points)
 
-```json
-{
-  "type": "short",
-  "prompt": "In your own words, why does this design fail under condition Z?",
-  "keyPoints": [
-    "identifies that the failure is caused by X",
-    "names the underlying mechanism (the Y rule)",
-    "proposes the standard fix (Z pattern)"
-  ],
-  "answer": "Reference answer: …",
-  "rationale": "Score = (points you honestly self-check) / (total points).",
-  "review": "sec-design-failure"
-}
+```html
+<div class="q" data-id="1-4" data-type="short"
+     data-key-points='["point 1","point 2","point 3","point 4"]'
+     data-answer="Reference answer: …"
+     data-rationale="…"
+     data-review="sec-…">
+  <div class="prompt"><span class="qnum">Q4.</span> In your own words: …?</div>
+  <textarea class="short" placeholder="Your answer…"></textarea>
+  <div class="key-points">
+    <div class="hint">Only check a point if you actually addressed it — under-checking hurts the book's calibration, over-checking only fools yourself.</div>
+  </div>
+  <div class="feedback"></div>
+</div>
 ```
 
-The key-point checkboxes are injected by `main.js` from `keyPoints` at submit time. The learner sees the honesty framing hint above the checklist (from `ui.self_check_hint` in the locale).
+The key-point checkboxes are injected by `book.js` at submit time (or on first focus of the textarea) from `data-key-points`. Score = (checked) / (total).
 
-### interactive (D3 visualization scored by interaction)
+## Index page (`index.html`) — the dashboard
 
-```json
-{
-  "type": "interactive",
-  "prompt": "Click the node that fails when service B is down.",
-  "code": "/* D3 code rendering an interactive viz into the question's mount div */",
-  "check": "/* returns {passed, earned} given the mount div as `this` */",
-  "answer": "Revealed after submit.",
-  "rationale": "…",
-  "review": "sec-data-flow"
-}
+The entry point learners open. Has the topbar (no `chapter-nav`), a `.toc-header`, a `.dashboard` (progress bar with `#overall-progress` / `#progress-pct` / `#progress-passed`), and an empty `<div class="chapter-grid"></div>` that `book.js` fills with one card per chapter. Two inline scripts before `book.js`:
+
+```html
+<script>
+window.BOOK_CONFIG = {
+  slug: "my-book",
+  lang: "en",
+  chapters: [
+    { n: 1, slug: "01-…-slug" },
+    { n: 2, slug: "02-…-slug" }
+    // one entry per chapter
+  ]
+};
+window.CHAPTER_DESCS = {
+  1: { title: "Chapter 1 Title", desc: "One-line description for the dashboard card." },
+  2: { title: "Chapter 2 Title", desc: "…" }
+};
+</script>
+<script src="assets/book.js" defer></script>
 ```
 
-`code` renders the viz; `check` scores the learner's interaction at submit time. Both are raw JS run via `new Function` with `this` = the mount div, `d3` and `helpers` in scope. Full guidance and worked examples in `references/visualizations.md`.
+`CHAPTER_DESCS` is dashboard-only metadata — it is NOT duplicated in the chapter files.
 
-## Runtime flow (already implemented)
+## The `demos` registry in `assets/book.js`
 
-1. `index.html` loads `css/book.css` and the four JS files in order.
-2. `main.js` detects the initial language (`?lang=` → `localStorage` → browser preference → `en`), calls `BookI18n.init(lang)` which fetches `locales/<lang>.json`.
-3. Fetches `content/<lang>/meta.json`, then each chapter file listed in the manifest.
-4. Renders the dashboard header, chapter sections, TOC, dashboard grid, and the language switcher.
-5. The learner switches language via the TOC `<select>`; `main.js` re-inits the locale and re-fetches content for the new language, then re-renders. No page reload.
-6. On test submit: `main.js` attaches each question's `answer`/`rationale` from the chapter data, builds key-point checkboxes for short questions, scores via `BookScoring.scoreQuestion`, shows feedback with the review link, saves the score via `BookDashboard.saveScore` (namespaced by book slug **and** language), and re-renders the TOC/dashboard.
+`book.js` ships with an empty `demos = {}` registry. Each book authors its own demos there. Pattern:
+
+```js
+var demos = {
+  myDemo: function (root) {
+    var out = root.querySelector(".demo-output");
+    out.classList.remove("empty");
+    out.textContent = "…result…";
+  }
+};
+```
+
+A chapter references it via `<div class="demo" data-demo="myDemo">…</div>`. The harness binds the handler to any `<button data-run>` inside the demo (click), plus range/text `<input>` events and radio `change` events for live demos. Keep demos small and self-contained: no `fetch()`, no reaching outside the demo's root element.
+
+## Inline SVG diagrams
+
+Pure inline SVG inside `<figure class="diagram"><svg viewBox="0 0 W H">…</svg><figcaption>…</figcaption></figure>`. No external images, no D3, no fetch. Use the theme colors (`#38e0d6`, `#6ee7ff`, `#34d399`, `#fbbf24`, `#f87171`, `#a78bfa`, `#aab0c0`, `#e8eaf0`, `#1d212c`/`#161922`). Always set `viewBox` so the SVG scales responsively; always include a `<figcaption>`.
+
+## Runtime flow (already implemented in `assets/book.js`)
+
+1. Each page's inline `<script>window.BOOK_CONFIG = …</script>` overrides the defaults compiled into `book.js`.
+2. On `DOMContentLoaded` (or immediately if already loaded), `book.js` boots:
+   - `initDemos()` — finds every `<div class="demo" data-demo="…">`, looks up the handler in `demos`, binds it.
+   - `buildTocPage()` — no-op unless `.chapter-grid` exists (only on `index.html`). Renders one card per chapter from `CFG.chapters` + `window.CHAPTER_DESCS`, with status pills from `localStorage`.
+   - If `<main class="chapter" data-chapter-n="N">` is present, `buildChapterNav(N)` fills `.topbar nav.chapter-nav` with prev / Contents / next links.
+3. On test submit: `book.js` scores each `<div class="q">` via its `data-*` attributes, shows feedback (verdict + answer + rationale + review link), saves the score to `localStorage` under `book:<slug>:<lang>:ch:<N>`, and re-renders the TOC/dashboard.
+4. Language switching is just navigation: the `lang-toggle` link jumps to the parallel file in another folder. No re-render, no `fetch`.
 
 ## Verifying the project before delivery
 
-Before handing off:
+Run this from the project root. It checks every chapter across every language folder:
 
-1. **JSON validity:** every `locales/*.json` and `content/**/*.json` parses. (`python3 -m json.tool < file` or `node -e "JSON.parse(require('fs').readFileSync('file','utf8'))"`.)
-2. **Key set parity:** every `locales/<lang>.json` has the same keys as `locales/en.json`. (Run a diff of `Object.keys()`.)
-3. **Manifest consistency:** every chapter listed in `meta.json` has a corresponding `ch-XX.json` file in the same language folder, and `id`/`chapter`/`file` fields are consistent.
-4. **Anchor parity:** every `review` value across all chapters points to a real `<section id="...">` in the same chapter's `bodyHtml`, and that section id exists in every language's copy of the chapter.
-5. **Smoke test the project:** run `./start.sh` (or `python3 -m http.server`), open the URL, submit one test of each type, switch languages, confirm scoring + review links + persistence work.
-6. **No external requests:** grep the rendered output for `https://` / `http://` — only allowed in `<a href>` further-reading links, never in resource loads.
+```bash
+for lang in */; do
+  [ -d "$lang" ] || continue
+  for f in "$lang"0*.html; do
+    [ -f "$f" ] || continue
+    # 1. Every data-review must resolve to an id="sec-…" in the same file
+    for r in $(grep -oE 'data-review="sec-[a-z0-9-]+"' "$f" | sort -u); do
+      rid=$(echo "$r" | sed 's/data-review=/id=/')
+      grep -qF "$rid" "$f" || echo "DANGLING review in $f: $r"
+    done
+    # 2. Every data-correct / data-accepted / data-key-points is valid JSON
+    for attr in data-correct data-accepted data-key-points; do
+      grep -oE "$attr='[^']*'" "$f" | sed "s/$attr='//;s/'$//" | while read -r json; do
+        echo "$json" | python3 -c "import json,sys; json.loads(sys.stdin.read())" 2>/dev/null \
+          || echo "BAD JSON in $f: $attr='$json'"
+      done
+    done
+  done
+done
+```
+
+Plus the cross-language i18n invariant (every chapter has the same question count, same `data-correct`/`data-accepted` for code-symbol answers, same `data-review` anchors, same section ids across languages) — see `references/i18n.md`.
+
+And a no-external-requests check:
+
+```bash
+grep -rn -E 'src="https?:|href="https?:' --include="*.html" --include="*.js" --include="*.css" . \
+  | grep -v '<a href="https://'   # further-reading <a> links are fine; resource loads are not
+```
+
+The only allowed external tokens are inside `<a href>` further-reading links, never resource loads (`<img src>`, `<script src>`, `<link href>` to a URL).

@@ -1,0 +1,212 @@
+<!doctype html>
+<!--
+  Example chapter — the canonical reference for the HTML-per-chapter template.
+  Copy this file, rename it (e.g. 02-real-chapter.html), and replace the body.
+  Every chapter in the book mirrors this exact structure so the shared
+  assets/book.js (scoring, nav, dashboard) works unchanged.
+
+  Anatomy:
+    1. <head> with the single stylesheet link
+    2. <div class="topbar"> with brand / crumb / chapter-nav / lang-toggle
+    3. <main class="chapter" data-chapter-n="N"> with the inline BOOK_CONFIG script
+    4. chapter-header (eyebrow / h1 / lede)
+    5. objectives box
+    6. <h2 id="sec-…"> subsections with prose / SVG diagrams / demos
+    7. recap + pitfalls
+    8. <form class="test"> with one <div class="q"> per question
+    9. closing <script src="assets/book.js" defer>
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 1 — Example Chapter</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html" class="brand">◆ MY BOOK</a>
+  <span class="crumb">Chapter 1 · Example</span>
+  <span class="spacer"></span>
+  <nav class="chapter-nav"></nav>
+  <a class="lang-toggle" href="../zh/01-example-chapter.html">中文 →</a>
+</div>
+
+<main class="chapter" data-chapter-n="1">
+<script>window.BOOK_CONFIG = { slug: "my-book", lang: "en", chapters: [{n:1,slug:"01-example-chapter"}] };</script>
+
+  <div class="chapter-header">
+    <div class="eyebrow">Chapter 1 · Foundations</div>
+    <h1>Example chapter</h1>
+    <p class="lede">
+      This is the canonical chapter template. Every real chapter mirrors this
+      structure exactly — the topbar, the inline <code>BOOK_CONFIG</code>, the
+      chapter-header, objectives, body subsections, recap, pitfalls, and the
+      test form. Copy this file, rename it, replace the content.
+    </p>
+  </div>
+
+  <div class="box objectives">
+    <div class="box-title">Learning objectives</div>
+    <ul>
+      <li>Objective one — what the learner should be able to do after this chapter</li>
+      <li>Objective two — phrased as a capability, not a topic</li>
+      <li>Objective three — 3 to 5 bullets is the right number</li>
+    </ul>
+  </div>
+
+  <h2 id="sec-main-concept">1.1 The main concept</h2>
+
+  <p>
+    Body prose goes here. Use <code>&lt;p&gt;</code> for paragraphs,
+    <code>&lt;ul&gt;&lt;li&gt;</code> for lists, <code>&lt;strong&gt;</code> for
+    emphasis, <code>&lt;code&gt;</code> for inline code, and
+    <code>&lt;pre&gt;&lt;code&gt;</code> for code blocks. The dark-cyan theme
+    styles all of these.
+  </p>
+
+  <p>
+    Subsection ids like <code>sec-main-concept</code> above are the anchors that
+    test questions' <code>data-review</code> attribute links to. They are
+    <strong>language-neutral</strong>: the same id appears in every language's
+    copy of the chapter, so review links work no matter which language the
+    learner is reading.
+  </p>
+
+  <h2 id="sec-diagrams">1.2 Inline SVG diagrams</h2>
+
+  <p>
+    Diagrams are pure inline SVG inside a <code>&lt;figure class="diagram"&gt;</code>.
+    No external images, no D3, no fetch. Use the theme colors:
+    <code>#38e0d6</code> (cyan), <code>#6ee7ff</code> (light cyan),
+    <code>#34d399</code> (green), <code>#fbbf24</code> (amber),
+    <code>#f87171</code> (red), <code>#a78bfa</code> (purple),
+    <code>#aab0c0</code> (dim text), <code>#e8eaf0</code> (text),
+    <code>#1d212c</code>/<code>#161922</code> (panel bg). Always set
+    <code>viewBox</code> so the SVG scales; always include a
+    <code>&lt;figcaption&gt;</code>.
+  </p>
+
+  <figure class="diagram">
+    <svg viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Example diagram">
+      <rect x="20" y="20" width="160" height="60" rx="8" fill="#1d212c" stroke="#38e0d6" stroke-width="2"/>
+      <text x="100" y="55" text-anchor="middle" fill="#38e0d6" font-size="14" font-weight="700">CONCEPT A</text>
+      <line x1="180" y1="50" x2="240" y2="50" stroke="#7a8194" stroke-width="2"/>
+      <polygon points="240,50 232,46 232,54" fill="#7a8194"/>
+      <rect x="240" y="20" width="140" height="60" rx="8" fill="#1d212c" stroke="#34d399" stroke-width="2"/>
+      <text x="310" y="55" text-anchor="middle" fill="#34d399" font-size="14" font-weight="700">CONCEPT B</text>
+      <text x="200" y="120" text-anchor="middle" fill="#aab0c0" font-size="11" font-style="italic">A causes B</text>
+    </svg>
+    <figcaption>An example diagram. Inline SVG, theme colors, viewBox + figcaption.</figcaption>
+  </figure>
+
+  <h2 id="sec-demos">1.3 Interactive demos</h2>
+
+  <p>
+    Demos are <code>&lt;div class="demo" data-demo="NAME"&gt;</code> blocks
+    backed by a handler in the <code>demos</code> registry in
+    <code>assets/book.js</code>. The handler receives the demo's root element
+    and is bound to any <code>&lt;button data-run&gt;</code> click (plus range/
+    text <code>input</code> events and radio <code>change</code> events for
+    live demos). This template ships an <strong>empty</strong> registry — each
+    book adds its own demos. Uncomment and adapt the example handler in
+    <code>book.js</code> to see this demo work.
+  </p>
+
+  <div class="demo" data-demo="exampleDemo">
+    <div class="demo-title">Try it — example demo</div>
+    <p>This demo calls the <code>exampleDemo</code> handler from <code>book.js</code>.</p>
+    <button data-run>Run demo</button>
+    <div class="demo-output empty">Click to run.</div>
+  </div>
+
+  <h2 id="sec-recap">1.4 Recap</h2>
+  <ul>
+    <li>Every chapter mirrors this exact structure.</li>
+    <li>Subsection ids (<code>sec-…</code>) are language-neutral anchors for test review links.</li>
+    <li>Diagrams are inline SVG; demos are <code>&lt;div data-demo&gt;</code> backed by a registry in <code>book.js</code>.</li>
+    <li>The test at the bottom uses <code>data-*</code> attributes that <code>book.js</code> scores.</li>
+  </ul>
+
+  <div class="box pitfalls">
+    <div class="box-title">Common pitfalls</div>
+    <ul style="margin:0;">
+      <li>Don't translate section ids — they're language-neutral.</li>
+      <li>Don't put a literal <code>"</code> inside a <code>data-*</code> JSON array unescaped; wrap the attribute in single quotes and use double quotes inside.</li>
+      <li>Every <code>data-review</code> value MUST match an <code>id="sec-…"</code> in the same chapter.</li>
+    </ul>
+  </div>
+
+  <!-- ====================== TEST ====================== -->
+  <!-- One <div class="q"> per question. Four types: mcq (single), mcq multi-select,
+       fill, short. Every question has data-answer, data-rationale, data-review. -->
+  <form class="test" data-chapter="1">
+    <h2>Chapter 1 Test</h2>
+
+    <!-- MCQ single-select: data-correct='["b"]' (JSON array, single-quoted).
+         Options are radio inputs with value="a"/"b"/"c"/"d". -->
+    <div class="q" data-id="1-1" data-type="mcq" data-correct='["b"]'
+         data-answer="B — because the section ids are the anchors that review links jump to."
+         data-rationale="B is correct. The ids are language-neutral anchors shared across every language's copy of the chapter, so a review link works no matter which language is open. A is wrong (the id does appear in HTML). C confuses ids with classes. D is backwards."
+         data-review="sec-main-concept">
+      <div class="prompt"><span class="qnum">Q1.</span> Why are subsection ids like <code>sec-main-concept</code> language-neutral?</div>
+      <label class="opt"><input type="radio" name="q-1-1" value="a"> A. They don't appear in the HTML</label>
+      <label class="opt"><input type="radio" name="q-1-1" value="b"> B. They are the anchors that test review links jump to, and the same id appears in every language's copy of the chapter</label>
+      <label class="opt"><input type="radio" name="q-1-1" value="c"> C. They are CSS class names, not ids</label>
+      <label class="opt"><input type="radio" name="q-1-1" value="d"> D. They get translated at runtime</label>
+      <div class="feedback"></div>
+    </div>
+
+    <!-- MCQ multi-select: add data-multiselect="true", options are checkboxes.
+         Correct = all-and-only the values in data-correct. -->
+    <div class="q" data-id="1-2" data-type="mcq" data-multiselect="true" data-correct='["a","c"]'
+         data-answer="A and C."
+         data-rationale="A and C are both true. B is false (SVG is fine; only external resource loads are banned). D is false (the figcaption is required by the convention, not the CSS)."
+         data-review="sec-diagrams">
+      <div class="prompt"><span class="qnum">Q2.</span> Which of these are true about inline SVG diagrams? <em>Select all that apply.</em></div>
+      <label class="opt"><input type="checkbox" name="q-1-2" value="a"> A. They use the theme colors and a <code>viewBox</code> attribute</label>
+      <label class="opt"><input type="checkbox" name="q-1-2" value="b"> B. They must load an external image file</label>
+      <label class="opt"><input type="checkbox" name="q-1-2" value="c"> C. They are wrapped in <code>&lt;figure class="diagram"&gt;</code> with a <code>&lt;figcaption&gt;</code></label>
+      <label class="opt"><input type="checkbox" name="q-1-2" value="d"> D. The <code>&lt;figcaption&gt;</code> is optional</label>
+      <div class="feedback"></div>
+    </div>
+
+    <!-- Fill: data-accepted='["ans1","ans2"]'. Normalized (trim, lowercase, collapse ws). -->
+    <div class="q" data-id="1-3" data-type="fill" data-accepted='["book.js","the book.js","assets/book.js"]'
+         data-answer="book.js (or assets/book.js)."
+         data-rationale="Demo handlers live in the demos registry inside assets/book.js. Each book authors its own demos there."
+         data-review="sec-demos">
+      <div class="prompt"><span class="qnum">Q3.</span> Fill the blank: interactive demos are backed by a handler in the <code>demos</code> registry in <code>______</code>.</div>
+      <input type="text" class="fill">
+      <div class="feedback"></div>
+    </div>
+
+    <!-- Short: data-key-points is a JSON array of checklist items. Self-checked via checkboxes injected at submit. -->
+    <div class="q" data-id="1-4" data-type="short"
+         data-key-points='["the structure is identical so the shared book.js works unchanged","section ids are language-neutral anchors for review links","diagrams are inline SVG; demos are backed by a registry in book.js","tests use data-* attributes that book.js scores"]'
+         data-answer="Every chapter mirrors the same structure (topbar, inline BOOK_CONFIG, chapter-header, objectives, sec-* subsections, recap, pitfalls, test form) so the shared book.js scores tests and builds nav without per-chapter logic. Section ids are language-neutral; diagrams are inline SVG; demos live in a registry in book.js."
+         data-rationale="If you got 'identical structure' + 'language-neutral ids' + 'inline SVG / demo registry' + 'data-* scoring', you've got the template."
+         data-review="sec-recap">
+      <div class="prompt"><span class="qnum">Q4.</span> In your own words: why does every chapter mirror the same structure, and what are the four key conventions?</div>
+      <textarea class="short" placeholder="Your answer…"></textarea>
+      <div class="key-points">
+        <div class="hint">Only check a point if you actually addressed it — under-checking hurts the book's calibration, over-checking only fools yourself.</div>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <button type="submit" class="submit-test">Submit test</button>
+    <div class="test-result"></div>
+    <button type="button" class="retake-btn" hidden>Retake test</button>
+  </form>
+
+  <p style="margin-top:2rem; color:var(--muted);">
+    Next: <a href="index.html"><strong>back to the contents page</strong></a>.
+  </p>
+
+</main>
+
+<script src="assets/book.js" defer></script>
+</body>
+</html>

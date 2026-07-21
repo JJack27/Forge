@@ -1,0 +1,80 @@
+<!doctype html>
+<!--
+  Dashboard / table-of-contents page.
+  This is the entry point learners open. It shows progress across all chapters
+  and links to each one. Structure:
+    1. <head> with the single stylesheet link
+    2. <div class="topbar"> with brand + tagline + lang-toggle (no chapter-nav on index)
+    3. <main class="toc"> with toc-header, dashboard (progress bar), chapter-grid
+    4. Two inline scripts BEFORE book.js: window.BOOK_CONFIG and window.CHAPTER_DESCS
+    5. <script src="assets/book.js" defer> — fills the grid + dashboard
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Book</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <span class="brand">◆ MY BOOK</span>
+  <span class="crumb">A subtitle or tagline goes here</span>
+  <span class="spacer"></span>
+  <a class="lang-toggle" href="../zh/index.html">中文 →</a>
+</div>
+
+<main class="toc">
+  <div class="toc-header">
+    <div class="logo">◆</div>
+    <h1>My Book</h1>
+    <p class="subtitle">
+      A one-paragraph description of the book: who it's for, what it covers,
+      and what the learner will be able to do after reading it.
+    </p>
+  </div>
+
+  <div class="dashboard">
+    <div class="progress-label">
+      <span>Your progress</span>
+      <span><strong id="progress-passed">0 / 1</strong> chapters · <strong id="progress-pct">0%</strong></span>
+    </div>
+    <div class="progress-bar"><div id="overall-progress" style="width:0%"></div></div>
+    <p class="small" style="margin-top:.7rem; margin-bottom:0;">
+      Progress is saved in your browser's <code>localStorage</code> — it survives reloads.
+      Take each chapter's test at the bottom; <strong>≥ 80% = learned enough to move forward</strong>
+      (soft gate — nothing locks).
+    </p>
+  </div>
+
+  <div class="chapter-grid"></div>
+
+  <div class="toc-footer">
+    Built with the <a href="https://github.com/your/repo">personal-book-forger</a> skill.
+    All diagrams are inline SVG; all demos run in your browser; no external requests.
+  </div>
+</main>
+
+<!-- BOOK_CONFIG: same object as on every chapter page. slug is kebab-case and
+     unique per book; it forms the localStorage key prefix with lang. -->
+<script>
+window.BOOK_CONFIG = {
+  slug: "my-book",
+  lang: "en",
+  chapters: [
+    { n: 1, slug: "01-example-chapter" }
+    // Add one entry per chapter: { n: 2, slug: "02-second-chapter" }, etc.
+  ]
+};
+// CHAPTER_DESCS: dashboard-only metadata (title + one-line description per
+// chapter). NOT duplicated in the chapter files — only used here to render
+// the chapter cards.
+window.CHAPTER_DESCS = {
+  1: { title: "Example Chapter",
+       desc: "The canonical chapter template. Every real chapter mirrors this structure." }
+};
+</script>
+<script src="assets/book.js" defer></script>
+</body>
+</html>

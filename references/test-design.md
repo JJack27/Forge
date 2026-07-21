@@ -8,7 +8,7 @@ How to write each chapter's test (Stage 2e): question count, types, scoring, the
 
 ## Question types
 
-The learner asked for three types, plus a fourth D3-powered interactive type. Use a mix; don't make a test all one type.
+Three types. Use a mix; don't make a test all one type.
 
 ### 1. Multiple-choice
 
@@ -38,28 +38,18 @@ This is the type that most rewards understanding and most resists gaming. Struct
 - The learner self-checks each point: "only check a point if you actually addressed it — under-checking hurts the book's calibration, over-checking only fools yourself." Score for the question = (checked points) / (total points).
 - This honesty framing matters. Put it above every short-answer checklist, not buried in help text.
 
-### 4. Interactive (D3-powered)
-
-For concepts best tested by doing — click the failing node, drag to reorder the request steps, adjust a parameter to hit a target. The question carries two code strings:
-
-- `code` — D3 code that renders an interactive visualization into the question's mount div.
-- `check` — code that scores the learner's interaction; returns `{ passed: bool, earned: 0|1 }` (or a fraction in [0,1] for partial credit).
-
-Both run via `new Function` with `this` = the mount div, `d3` and `helpers` in scope. The render runs when the question mounts; the check runs at submit. If `check` throws, the question scores 0 (logged to console) rather than breaking the test.
-
-**When to use it.** Only when the interaction genuinely tests understanding that a static question can't — tracing a failure path on a real diagram, reordering a pipeline, tuning a value to meet a constraint. Don't use it for things a multiple-choice question would test equally well; interactive questions cost more to author and more for the learner to operate.
-
-**Scoring patterns.** The most common is click-selection: the render code stores the learner's pick on the node's bound datum (`d.selected = true` in the click handler), and `check` reads it back via `this.querySelectorAll("g.node")` + each element's `__data__`. See `references/visualizations.md` for the worked example.
-
 ## Where test data lives
 
-In the multi-file project, each chapter's test lives in `content/<lang>/ch-XX.json` under `test.questions`. The **scoring logic is language-neutral** (it reads `data-*` attributes off the rendered DOM), so when you translate a chapter:
+Each chapter's test lives **inline in the chapter HTML** as `<form class="test" data-chapter="N">` with one `<div class="q" …>` per question. The question data is in `data-*` attributes on each `.q` div (`data-type`, `data-correct`/`data-accepted`/`data-key-points`, `data-answer`, `data-rationale`, `data-review`); the shared `assets/book.js` reads them at submit time. No JSON content files.
+
+The **scoring logic is language-neutral** (it reads the `data-*` attributes off the rendered DOM), so when you translate a chapter:
 
 - Keep the same number of questions, same types, same order.
-- Keep `correct` (mcq value tokens) and `accepted` (fill) **identical across languages**, unless an `accepted` answer is a natural-language term — then translate its acceptable forms.
-- Keep the `keyPoints` count identical for short-answer questions.
+- Keep `data-correct` (mcq value tokens) and `data-accepted` (fill, when the answer is a code symbol) **identical across languages**.
+- Keep the `data-key-points` count identical for short-answer questions.
+- Keep `data-review` values (section ids) identical — they're language-neutral anchors.
 
-See `references/i18n.md` for the full invariant.
+See `references/i18n.md` for the full invariant and the verification script.
 
 ## Scoring
 
@@ -76,17 +66,18 @@ This is what makes the test a real gate rather than a generic quiz: if the learn
 
 ## Every question ships with
 
-For each question, generate (the HTML template consumes this):
+For each `<div class="q">`, set these `data-*` attributes (the shared `book.js` reads them at submit time):
 
-- `id` — stable within the chapter, used for review navigation
-- `type` — `mcq` | `fill` | `short`
-- `prompt` — the question text (may include code blocks)
-- `options` (mcq only) — array; mark which are correct
-- `accepted` (fill only) — array of acceptable normalized answers
-- `keyPoints` (short only) — array of checklist items
-- `answer` — the canonical correct answer / explanation, revealed after submit
-- `rationale` — one or two sentences on *why* this is the answer; for partial-credit cases, why each distractor is wrong
-- `review` — an in-book anchor for re-study, e.g. `chapter-3#sec-borrow-checker-rules`. The frontend renders this as "review §3.2".
+- `data-id` — stable within the chapter (e.g. `1-1`, `1-2`), used for review navigation
+- `data-type` — `mcq` | `fill` | `short`
+- `data-correct` (mcq only) — JSON array of correct option values, e.g. `'["b"]'` (single) or `'["a","c"]'` (multi). Add `data-multiselect="true"` for checkbox mode.
+- `data-accepted` (fill only) — JSON array of acceptable normalized answers, e.g. `'["ownership","borrowing"]'`
+- `data-key-points` (short only) — JSON array of checklist items, e.g. `'["identifies X","names mechanism Y"]'`
+- `data-answer` — the canonical correct answer / explanation, revealed after submit
+- `data-rationale` — one or two sentences on *why* this is the answer; for partial-credit cases, why each distractor is wrong
+- `data-review` — a section id for re-study, e.g. `sec-borrow-checker-rules`. The frontend renders this as "→ review this section" and the link jumps to that `id` in the same chapter.
+
+The question prompt and options are plain HTML inside the `.q` div (a `<div class="prompt">` with `<span class="qnum">Q1.</span>` prefix, then `<label class="opt">` options for mcq, `<input type="text" class="fill">` for fill, `<textarea class="short">` for short). Full anatomy and worked examples in `references/project-structure.md`.
 
 ## Soft-gate behavior (do not lock)
 

@@ -1,15 +1,15 @@
 ---
 name: personal-book-forger
-description: Forge a personalized, multi-file HTML learning book (with i18n and D3/SVG interactive visualizations) from a repo, a topic/domain, or external materials. Before writing each chapter, the skill asks the learner 2-3 scenario/code-understanding questions to gauge their level, then calibrates chapter depth and writes a chapter test (mixed question types including interactive D3 questions, 80% soft-gate). Two goals: make the learner an expert of a DOMAIN, or an expert of a SPECIFIC REPO (onboarding chapters for DB schema, core services, data flow, etc.). Supports multiple languages (runtime switcher). Use whenever the user asks to turn a codebase, a subject area, documentation, or papers into a learnable book, course, tutorial, or study guide — even if they don't use the word "book". Triggers on phrasings like "make me a book on X", "turn this repo into something I can learn from", "create a course for me on Y", "build a study guide for Z from these docs", "onboard me to this repo".
+description: Forge a personalized, multi-file HTML learning book (one self-contained .html file per chapter, inline SVG diagrams, a small per-book demo registry, bilingual via sibling folders) from a repo, a topic/domain, or external materials. Before writing each chapter, the skill asks the learner 2-3 scenario/code-understanding questions to gauge their level, then calibrates chapter depth and writes a chapter test (mixed question types, 80% soft-gate). Two goals: make the learner an expert of a DOMAIN, or an expert of a SPECIFIC REPO (onboarding chapters for DB schema, core services, data flow, etc.). Supports multiple languages via parallel sibling folders. Use whenever the user asks to turn a codebase, a subject area, documentation, or papers into a learnable book, course, tutorial, or study guide — even if they don't use the word "book". Triggers on phrasings like "make me a book on X", "turn this repo into something I can learn from", "create a course for me on Y", "build a study guide for Z from these docs", "onboard me to this repo".
 ---
 
 # Personal Book Forger
 
-Forge a **multi-file HTML learning book with internationalization and D3/SVG interactive visualizations**, calibrated to the learner's actual level — not a generic reference. The book's source can be a repo, a topic/domain, external materials, or a combination. Two goals: make the learner an **expert of a domain**, or an **expert of a specific repo** (with onboarding chapters for DB schema, core services, data flow, etc.). The book can be authored in multiple languages (runtime language switcher). Each chapter has a test; reaching 80% means the chapter is "learned enough to move forward" (soft gate — never locks).
+Forge a **multi-file HTML learning book**, calibrated to the learner's actual level — not a generic reference. The book's source can be a repo, a topic/domain, external materials, or a combination. Two goals: make the learner an **expert of a domain**, or an **expert of a specific repo** (with onboarding chapters for DB schema, core services, data flow, etc.). The book can be authored in multiple languages (parallel sibling folders). Each chapter has a test; reaching 80% means the chapter is "learned enough to move forward" (soft gate — never locks).
+
+The output is **one self-contained `.html` file per chapter** (plus an `index.html` dashboard and a shared `assets/` folder per language). No build step, no server, no `fetch()` — every chapter works opened directly via `file://`. Diagrams are inline SVG; interactive widgets are `<div data-demo>` elements backed by a small registry the author adds to `assets/book.js`.
 
 The defining behavior: **before writing each chapter, ask the learner 2–3 scenario/code-understanding questions, then write the chapter at a depth matched to what they actually know.** This is not optional and not a formality — it is the whole point of the skill.
-
-Visualizations (chapter-level diagrams/simulations/charts, and interactive D3 questions inside tests) are authored as raw D3 code in the chapter JSON and rendered by the template's `js/viz.js` runner. See `references/visualizations.md` for the full contract.
 
 ## How to use this skill
 
@@ -116,52 +116,53 @@ This is the heart of the skill. Run this loop once per chapter. **Do not pre-gen
 
 - Main explanation, at the depth chosen above
 - Code examples / source snippets — if the source is a repo, cite real file paths and line numbers. For `repo-expert` goal onboarding chapters, this is the core of the chapter: real schema files, real service entry points, real route handlers, with citations.
-- **D3/SVG visualizations** when a concept is better shown than described. Add entries to the chapter's `viz[]` array — raw D3 code that renders into a container. Default to including a viz when:
+- **Inline SVG diagrams** (`<figure class="diagram"><svg viewBox="…">…</svg><figcaption>…</figcaption></figure>`) when a concept is better shown than described. No external images, no D3, no `fetch()`. Use the theme colors (`#38e0d6`, `#6ee7ff`, `#34d399`, `#fbbf24`, `#f87171`, `#a78bfa`, `#aab0c0`, `#e8eaf0`, `#1d212c`/`#161922`). Default to including a diagram when:
   - The chapter is about **relationships or structure** (DB schema → ER diagram, architecture → subsystem map, class relationships → inheritance graph).
-  - The chapter is about **flow or process** (request lifecycle → flow stepper, event ordering → sequence diagram, algorithm states → step-through simulation).
-  - The chapter is about **data or trade-offs** (latency distributions, complexity curves, benchmark comparisons → bar/line/scatter charts).
-  Use the chapter's `viz[]` array (append to body in order) or drop a `<div data-viz="<slug>"></div>` placeholder in `bodyHtml` for precise placement. Full authoring conventions and worked examples in `references/visualizations.md`.
+  - The chapter is about **flow or process** (request lifecycle → flow diagram, event ordering → sequence diagram, layering → stacked-panel diagram).
+  - The chapter is about **a contrast or a taxonomy** (two designs side-by-side, three layers of detection, four question types) — side-by-side panels with a short caption beats a paragraph of prose.
+- **Interactive demos** (`<div class="demo" data-demo="NAME">…<button data-run>…</button><div class="demo-output empty">…</div></div>`) when the learner should *see* a concept in motion (a hash stability demo, a per-site token slider, a perceive-decide-act loop printing step by step). Each demo is backed by a handler you add to the `demos = {}` registry in `assets/book.js`; the harness binds it to the demo's `<button data-run>` automatically. Keep demos small and self-contained (no reaching outside the demo's root element). Add the handler to `book.js` once, reference it by name from any chapter.
 - Learning objectives list (refined from the outline draft)
 - Common pitfalls / contrasts with adjacent concepts / further reading
 
-**2e. Write the chapter test.** 8–15 questions mixing the available question types: multiple-choice, fill-in-the-blank / code-fill, short-answer with self-checked key points, and (when the interaction genuinely tests understanding a static question can't) **interactive D3 questions**. **Weight questions toward the points the assessment showed were weak.** Every question ships with its answer, a rationale, and an in-book anchor (the section id, e.g. `sec-ownership-rules` — anchors are language-neutral). Test design rules in `references/test-design.md`; the interactive type and the viz contract in `references/visualizations.md`.
+**Honest scope (especially for `repo-expert`).** If the source is a repo, read the **actual files** (source, patches, code) — not just the README and docs. Where the docs describe an aspirational design that the committed code doesn't fully implement, flag it explicitly in the chapter and probe it in the test. A reader who trusts the doc will credit the implementation for guarantees it doesn't provide; the book's job is to be more trustworthy than the doc. This is often the most valuable thing the book can do.
 
-Use the `interactive` question type sparingly — only when the learner has to *do* something (trace a failure on a real diagram, reorder a pipeline, tune a value to meet a constraint) that a multiple-choice question couldn't test as well. Authoring an interactive question costs more than a static one; don't use it where it isn't earning its keep.
+**2e. Write the chapter test.** 8–15 questions mixing the three available question types: multiple-choice (single-select and multi-select), fill-in-the-blank / code-fill, and short-answer with self-checked key points. **Weight questions toward the points the assessment showed were weak.** Every question ships with its answer, a rationale, and an in-book anchor (the section id, e.g. `sec-ownership-rules` — anchors are language-neutral). Test design rules in `references/test-design.md`.
 
 After 2e, confirm with the learner before moving to the next chapter. They may ask you to revise this chapter's body or test.
 
 ### Stage 3 — Assemble the multi-file project
 
-Assemble every chapter (in the **primary language only** for now) into the multi-file project structure. Start from `assets/book-template/` and fill in:
+Assemble every chapter (in the **primary language only** for now) into the multi-file project structure. Start from `assets/book-template/` (copy the whole folder to `./books/<book-slug>/`) and fill in:
 
-- `locales/<primary-lang>.json` — UI strings (translate the template's `en.json` if the primary language isn't English).
-- `content/<primary-lang>/meta.json` — book title, subtitle, ordered chapter manifest.
-- `content/<primary-lang>/ch-01.json … ch-XX.json` — one file per chapter.
-- `js/main.js` — set `BOOK_SLUG` to a unique kebab-case id for the book.
+- `<primary-lang>/index.html` — set the dashboard title/subtitle, the inline `window.BOOK_CONFIG` (slug + lang + chapters list), and `window.CHAPTER_DESCS` (title + one-line description per chapter, dashboard-only).
+- `<primary-lang>/01-…-slug.html … 0N-…-slug.html` — one self-contained HTML file per chapter. Copy `01-example-chapter.html` as the canonical reference; mirror its structure exactly (topbar, inline `BOOK_CONFIG`, chapter-header, objectives, `sec-*` subsections, recap, pitfalls, `<form class="test">`). The same inline `window.BOOK_CONFIG` object appears on every page.
+- `<primary-lang>/assets/book.js` — add your book's demos to the `demos = {}` registry. Everything else (scoring, nav, dashboard) is already wired and shared verbatim across all language folders.
+- Rename the `en/` folder to your primary language code if it isn't English (`zh/`, `es/`, etc.).
 
-Don't touch `index.html`, `css/`, or the other `js/` files — they're already wired.
+Don't touch `assets/style.css` or the scoring/nav/dashboard portions of `assets/book.js` — they're shared verbatim across all language folders and already wired.
 
-Test mechanics (all client-side, no backend — already implemented in `js/scoring.js` + `js/main.js`):
+Test mechanics (all client-side, no backend — implemented in `assets/book.js`, scores via `data-*` attributes on each `<div class="q">`):
 
-- **Multiple-choice** — exact match against the correct option(s)
-- **Fill-in-the-blank / code-fill** — normalized string comparison (trim, collapse whitespace, case-insensitive unless the answer is case-sensitive). Accept a small set of equivalent answers per blank.
-- **Short-answer** — show the reference answer as a checklist of key points; the learner self-checks which points they actually addressed; score = (checked points) / (total points). Be honest guidance above the checklist: "only check a point if you actually covered it — cheating here only hurts you."
+- **Multiple-choice** (`data-type="mcq"`) — single-select by default; add `data-multiselect="true"` for checkbox multi-select. Correct options in `data-correct='["b"]'` (JSON array, single-quoted).
+- **Fill-in-the-blank / code-fill** (`data-type="fill"`) — normalized string comparison (trim, lowercase, collapse whitespace). Accepted answers in `data-accepted='["ans1","ans2"]'`. Multi-blank is order-tolerant.
+- **Short-answer** (`data-type="short"`) — key-point checklist in `data-key-points='["p1","p2",…]'`, self-checked by the learner; score = (checked points) / (total points). The honesty framing ("only check a point if you actually addressed it — cheating here only hurts you") is built into the template.
+- Every question also carries `data-answer` (revealed reference answer), `data-rationale` (why), and `data-review="sec-…"` (the section anchor the "review this section" link jumps to).
 
-Scoring and the 80% rule (already implemented in `js/dashboard.js`):
+Scoring and the 80% rule (implemented in `assets/book.js`):
 
 - Each chapter test produces a percentage. **≥ 80% → "learned enough to move forward."** The chapter gets a green check on the TOC and dashboard.
 - **< 80% is a soft gate, never a lock.** The learner can always read the next chapter. But: the TOC marks the chapter yellow, and on the test results page every wrong question is highlighted with a link to the exact book section to re-read ("review this section — you missed the distinction between X and Y").
-- Scores persist in `localStorage` keyed by **book slug AND language** (`book:<slug>:<lang>:ch:<n>`), so progress is tracked per language.
+- Scores persist in `localStorage` keyed by **book slug AND language** (`book:<slug>:<lang>:ch:<n>`), so progress is tracked per language automatically — the per-page `window.BOOK_CONFIG.lang` field drives the key.
 
-Full project layout, file schemas, and verification steps in `references/project-structure.md`.
+Full project layout, the chapter HTML anatomy, the `data-*` attribute schemas per question type, and verification steps in `references/project-structure.md`.
 
 ### Stage 4 — Deliver (primary language) and explain usage
 
-- Write the project directory to `./books/<book-slug>/` (containing `index.html`, `css/`, `js/`, `locales/`, `content/`) unless the learner specified otherwise.
+- Write the project directory to `./books/<book-slug>/` unless the learner specified otherwise.
 - Tell the learner:
-  - **The project must be served over HTTP, not opened via `file://`.** Easiest: `cd` into the project dir and run `./start.sh` (or `python3 -m http.server 8000`), then open `http://localhost:8000`. The browser blocks `fetch()` of local JSON under `file://`, which would break the book.
+  - **Just open `<primary-lang>/index.html` directly in a browser.** No server, no build step, no internet connection required — every chapter is fully self-contained HTML and works under `file://`.
   - That progress and scores are saved in the browser's `localStorage`, per language.
-  - How to switch languages (the `<select>` at the bottom of the TOC) — and that only the primary language is populated so far if other languages were selected.
+  - How to switch languages: the `lang-toggle` link in the top-right of any page jumps to the parallel file in the other language's folder. (Other languages are added in Stage 4.5.)
   - How to re-take a test (button on each chapter).
   - How to come back to you (the agent) to add, revise, or deepen chapters — the project is regenerable from the skill.
 
@@ -169,10 +170,10 @@ Full project layout, file schemas, and verification steps in `references/project
 
 For each additional language the learner selected at Stage 0.5 (after the primary-language book is delivered and approved):
 
-1. Translate `locales/<primary>.json` → `locales/<newlang>.json` (same keys, translated values).
-2. Translate every file in `content/<primary>/` → `content/<newlang>/` (same structure, same anchors, same test logic — only prose changes).
-3. Add the new language code to `SUPPORTED` in `js/i18n.js`.
-4. Verify the i18n invariant: same keys, same chapter structure, same anchors, same number/type/order of test questions per chapter. (See "Verifying the project" in `references/project-structure.md`.)
+1. Copy the entire `<primary-lang>/` folder → `<newlang>/` (e.g. `en/` → `zh/`). Copy the `assets/` subfolder verbatim — `book.js` and `style.css` are identical across languages.
+2. For each chapter HTML file: translate the prose (chapter title, eyebrow, lede, objectives, body paragraphs, list items, table cells, figcaptions, box content, test prompts/answers/rationales/key-points). **Do NOT translate**: code blocks, file paths, HTML tags/attributes, section ids (`sec-…`), `data-correct`/`data-accepted` values that are code symbols, `data-review` values, the `window.BOOK_CONFIG` script block (except flip `lang: "en"` → `lang: "zh"`).
+3. On every file in the new folder: change `<html lang="en">` → `<html lang="<newlang>">`, and flip the `lang-toggle` link to point back at the primary language (`href="../en/…"` with text like `→ English`).
+4. Verify the i18n invariant: same section ids, same question count per chapter, same `data-correct`/`data-accepted` for code-symbol answers, same `data-review` anchors, same `data-key-points` count. (See "Verifying the project" in `references/project-structure.md` for the script.)
 5. Tell the learner the language is ready and ask whether to continue to the next selected language.
 
 Full translation guidance (what to translate, what to leave, how to keep the invariant) in `references/i18n.md`.
