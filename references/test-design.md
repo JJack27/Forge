@@ -8,7 +8,7 @@ How to write each chapter's test (Stage 2e): question count, types, scoring, the
 
 ## Question types
 
-The learner asked for three types. Use a mix; don't make a test all one type.
+The learner asked for three types, plus a fourth D3-powered interactive type. Use a mix; don't make a test all one type.
 
 ### 1. Multiple-choice
 
@@ -37,6 +37,19 @@ This is the type that most rewards understanding and most resists gaming. Struct
   - [ ] notes the trade-off the fix introduces
 - The learner self-checks each point: "only check a point if you actually addressed it — under-checking hurts the book's calibration, over-checking only fools yourself." Score for the question = (checked points) / (total points).
 - This honesty framing matters. Put it above every short-answer checklist, not buried in help text.
+
+### 4. Interactive (D3-powered)
+
+For concepts best tested by doing — click the failing node, drag to reorder the request steps, adjust a parameter to hit a target. The question carries two code strings:
+
+- `code` — D3 code that renders an interactive visualization into the question's mount div.
+- `check` — code that scores the learner's interaction; returns `{ passed: bool, earned: 0|1 }` (or a fraction in [0,1] for partial credit).
+
+Both run via `new Function` with `this` = the mount div, `d3` and `helpers` in scope. The render runs when the question mounts; the check runs at submit. If `check` throws, the question scores 0 (logged to console) rather than breaking the test.
+
+**When to use it.** Only when the interaction genuinely tests understanding that a static question can't — tracing a failure path on a real diagram, reordering a pipeline, tuning a value to meet a constraint. Don't use it for things a multiple-choice question would test equally well; interactive questions cost more to author and more for the learner to operate.
+
+**Scoring patterns.** The most common is click-selection: the render code stores the learner's pick on the node's bound datum (`d.selected = true` in the click handler), and `check` reads it back via `this.querySelectorAll("g.node")` + each element's `__data__`. See `references/visualizations.md` for the worked example.
 
 ## Where test data lives
 

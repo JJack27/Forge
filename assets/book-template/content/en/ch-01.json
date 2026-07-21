@@ -4,8 +4,28 @@
     "Objective 1",
     "Objective 2"
   ],
-  "bodyHtml": "<p>Chapter content goes here. This field is pre-rendered HTML, injected as-is.</p><section id=\"sec-example-slug\"><h3>Subsection</h3><p>Subsection content. Note the <em>id</em> — it is the anchor that test review links jump to. Anchors are language-neutral (same id across all languages) so review links work everywhere.</p></section><pre><code>// example code block\nfn main() {}</code></pre>",
+  "bodyHtml": "<p>Chapter content goes here. This field is pre-rendered HTML, injected as-is.</p><section id=\"sec-example-slug\"><h3>Subsection</h3><p>Subsection content. Note the <em>id</em> — it is the anchor that test review links jump to. Anchors are language-neutral (same id across all languages) so review links work everywhere.</p><p>The placeholder below is replaced by the viz with slug <code>er-diagram</code> when the chapter mounts. Vizs without a placeholder are appended to the body in order.</p><div data-viz=\"er-diagram\"></div></section><pre><code>// example code block\nfn main() {}</code></pre>",
   "pitfallsHtml": "<p>Common pitfalls, contrasts with adjacent concepts, and further reading go here.</p>",
+  "viz": [
+    {
+      "type": "diagram",
+      "slug": "er-diagram",
+      "caption": "Example: a minimal ER sketch (User 1—* Post).",
+      "code": "var w = 640, h = 200;\nvar svg = d3.select(this).append('svg').attr('viewBox', `0 0 ${w} ${h}`);\nvar nodes = [\n  { id: 'User', x: 120, y: 100 },\n  { id: 'Post', x: 460, y: 100 }\n];\n// Edge between the two entities.\nsvg.append('line').attr('class','edge')\n  .attr('x1', nodes[0].x + 60).attr('y1', nodes[0].y)\n  .attr('x2', nodes[1].x - 60).attr('y2', nodes[1].y);\n// \"one\" / \"many\" crow's-foot-ish labels.\nsvg.append('text').attr('class','label').attr('x', nodes[0].x + 70).attr('y', nodes[0].y - 8).text('1');\nsvg.append('text').attr('class','label').attr('x', nodes[1].x - 80).attr('y', nodes[1].y - 8).text('*');\n// Entity boxes.\nvar g = svg.selectAll('g.entity').data(nodes).enter().append('g')\n  .attr('transform', d => `translate(${d.x - 60},${d.y - 30})`);\ng.append('rect').attr('width', 120).attr('height', 60).attr('rx', 6)\n  .attr('fill', '#eff6ff').attr('stroke', 'var(--accent)');\ng.append('text').attr('class','label').attr('x', 60).attr('y', 35).attr('text-anchor','middle').text(d => d.id);"
+    },
+    {
+      "type": "simulation",
+      "slug": "flow-stepper",
+      "caption": "Example: step through a request lifecycle. Use the buttons.",
+      "code": "var steps = ['request', 'router', 'controller', 'service', 'database', 'response'];\nvar w = 640, h = 140;\nvar svg = d3.select(this).append('svg').attr('viewBox', `0 0 ${w} ${h}`);\nvar state = { i: 0 };\nvar x = d3.scalePoint().domain(steps).range([40, w - 40]);\n// Base line.\nsvg.append('line').attr('class','edge').attr('x1', 40).attr('x2', w - 40).attr('y1', 50).attr('y2', 50);\n// Step nodes.\nvar node = svg.selectAll('circle').data(steps).enter().append('circle')\n  .attr('cx', d => x(d)).attr('cy', 50).attr('r', 10).attr('class','node');\nsvg.selectAll('text.label').data(steps).enter().append('text').attr('class','label')\n  .attr('x', d => x(d)).attr('y', 80).attr('text-anchor','middle').text(d => d);\n// Highlight the active step.\nvar marker = svg.append('circle').attr('cx', x(steps[0])).attr('cy', 50).attr('r', 16)\n  .attr('fill','none').attr('stroke','var(--accent)').attr('stroke-width', 3);\n// Controls.\nvar btns = d3.select(this).append('div').style('text-align','center').style('margin-top','0.5rem');\nfunction render() { marker.attr('cx', x(steps[state.i])); }\nbtns.append('button').text('← prev').on('click', () => { state.i = Math.max(0, state.i - 1); render(); });\nbtns.append('span').text(' ');\nbtns.append('button').text('next →').on('click', () => { state.i = Math.min(steps.length - 1, state.i + 1); render(); });\nrender();"
+    },
+    {
+      "type": "chart",
+      "slug": "bar-chart",
+      "caption": "Example: a bar chart of latency by endpoint.",
+      "code": "var data = [\n  { name: '/list',   ms: 12 },\n  { name: '/search', ms: 48 },\n  { name: '/export', ms: 190 },\n  { name: '/login',  ms: 35 }\n];\nvar w = 560, h = 220, m = { top: 20, right: 20, bottom: 40, left: 50 };\nvar iw = w - m.left - m.right, ih = h - m.top - m.bottom;\nvar svg = d3.select(this).append('svg').attr('viewBox', `0 0 ${w} ${h}`)\n  .append('g').attr('transform', `translate(${m.left},${m.top})`);\nvar x = d3.scaleBand().domain(data.map(d => d.name)).range([0, iw]).padding(0.2);\nvar y = d3.scaleLinear().domain([0, d3.max(data, d => d.ms)]).range([ih, 0]);\nsvg.append('g').attr('class','axis').attr('transform', `translate(0,${ih})`).call(d3.axisBottom(x));\nsvg.append('g').attr('class','axis').call(d3.axisLeft(y).ticks(4));\nsvg.selectAll('rect.bar').data(data).enter().append('rect').attr('class','node')\n  .attr('x', d => x(d.name)).attr('y', d => y(d.ms))\n  .attr('width', x.bandwidth()).attr('height', d => ih - y(d.ms));"
+    }
+  ],
   "test": {
     "passThreshold": 80,
     "questions": [
@@ -67,6 +87,15 @@
         ],
         "answer": "Reference answer: the design fails because of X; the underlying mechanism is Y; the standard fix is Z, which introduces the trade-off of …",
         "rationale": "Score = (points you honestly self-check) / (total points). Keep the honesty framing in mind.",
+        "review": "sec-example-slug"
+      },
+      {
+        "type": "interactive",
+        "prompt": "Interactive (D3). In the diagram below, click the node that fails when service B is down.",
+        "code": "var nodes = [\n  { id: 'A', x: 80,  y: 60, fails: false },\n  { id: 'B', x: 240, y: 60, fails: false },\n  { id: 'C', x: 400, y: 60, fails: true }  // C times out when B is down\n];\nvar w = 480, h = 140;\nvar svg = d3.select(this).append('svg').attr('viewBox', `0 0 ${w} ${h}`);\n// Edges A->B, B->C\n[[0,1],[1,2]].forEach(function(pair){\n  svg.append('line').attr('class','edge')\n    .attr('x1', nodes[pair[0]].x).attr('y1', nodes[pair[0]].y)\n    .attr('x2', nodes[pair[1]].x).attr('y2', nodes[pair[1]].y);\n});\nvar g = svg.selectAll('g.node').data(nodes).enter().append('g')\n  .style('cursor','pointer')\n  .on('click', function(event, d){\n    nodes.forEach(function(n){ n.selected = (n === d); });\n    g.select('circle').attr('class', function(n){ return n.selected ? 'node-fail' : 'node'; });\n  });\ng.append('circle').attr('class','node').attr('cx', function(d){ return d.x; }).attr('cy', function(d){ return d.y; }).attr('r', 22);\ng.append('text').attr('class','label').attr('x', function(d){ return d.x; }).attr('y', function(d){ return d.y + 5; }).attr('text-anchor','middle').text(function(d){ return d.id; });",
+        "check": "var nodes = Array.prototype.slice.call(this.querySelectorAll('g.node'));\nvar data = nodes.map(function(g){ return g.__data__; });\nvar selected = data.filter(function(d){ return d.selected; });\nif (selected.length !== 1) return { passed: false, earned: 0 };\nvar ok = selected[0].fails === true;\nreturn { passed: ok, earned: ok ? 1 : 0 };",
+        "answer": "Node C — when B is down, the request from B to C times out, so C is the node that fails.",
+        "rationale": "The failure propagates downstream: B being down doesn't make B itself 'fail' in this scenario — it's the dependent call to C that breaks.",
         "review": "sec-example-slug"
       }
     ]

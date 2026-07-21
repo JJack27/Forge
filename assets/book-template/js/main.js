@@ -52,7 +52,38 @@
     }
 
     section.innerHTML = html;
+
+    // Mount any chapter-level visualizations (ch.viz[]).
+    // The author can either leave a placeholder <div data-viz="slug"></div> in bodyHtml
+    // for precise placement, or omit it — in which case we append the viz to the body.
+    if (ch.viz && ch.viz.length) {
+      mountChapterVizs(section, ch, state.lang, i18n);
+    }
+
     return section;
+  }
+
+  // Mount all vizs for a chapter. Honors <div data-viz="slug"> placeholders in bodyHtml;
+  // any viz without a placeholder gets appended to the chapter body in order.
+  function mountChapterVizs(section, ch, lang, i18n) {
+    var ctx = { lang: lang, t: i18n.t.bind(i18n) };
+    var bodyEl = section.querySelector(".body");
+    ch.viz.forEach(function (spec) {
+      var placeholder = section.querySelector('[data-viz="' + cssEscape(spec.slug) + '"]');
+      var container;
+      if (placeholder) {
+        // Replace the placeholder with the live viz container.
+        container = document.createElement("div");
+        container.id = "viz-" + spec.slug;
+        placeholder.parentNode.replaceChild(container, placeholder);
+      } else {
+        container = document.createElement("div");
+        container.id = "viz-" + spec.slug;
+        if (bodyEl) bodyEl.appendChild(container);
+        else section.appendChild(container);
+      }
+      BookViz.mountViz(container, spec, ctx);
+    });
   }
 
   function renderTest(ch, i18n) {
@@ -103,6 +134,13 @@
       html += '<div class="prompt"><span class="qnum">' + i18n.t("ui.q") + num + ".</span>" + (q.promptHtml || escapeHtml(q.prompt || "")) + "</div>";
       html += '<textarea class="short" placeholder="' + escAttr(i18n.t("ui.your_answer")) + '"></textarea>';
       html += '<div class="key-points"><div class="hint">' + escapeHtml(i18n.t("ui.self_check_hint")) + "</div></div>";
+    } else if (q.type === "interactive") {
+      // The interactive question type: code renders an interactive D3 viz into a
+      // container inside the question; `check` scores the learner's interaction at submit.
+      // The code/check are stored as data-* attributes (JSON-encoded) and run by viz.js.
+      html += ' data-interactive-code=\'' + escAttr(q.code || "") + "' data-interactive-check='" + escAttr(q.check || "") + "'>";
+      html += '<div class="prompt"><span class="qnum">' + i18n.t("ui.q") + num + ".</span>" + (q.promptHtml || escapeHtml(q.prompt || "")) + "</div>";
+      html += '<div class="viz-container interactive-mount" data-q-id="' + escAttr(id) + '"></div>';
     } else {
       html += ">[unknown question type: " + escapeHtml(q.type) + "]";
     }
@@ -212,6 +250,9 @@
       main.appendChild(renderChapter(ch, state.lang, i18n));
     });
 
+    // Mount interactive-question visualizations (after all chapter DOM is in place).
+    mountInteractiveQuestions(chapters, state.lang, i18n);
+
     // TOC + dashboard grid
     BookDashboard.render(BOOK_SLUG, state.lang, chapters.map(function (c) {
       return { id: c.id, title: c.title, chapter: c.chapter };
@@ -229,6 +270,24 @@
     }
   }
 
+  // Mount the D3 viz for every interactive question across all chapters.
+  function mountInteractiveQuestions(chapters, lang, i18n) {
+    var ctx = { lang: lang, t: i18n.t.bind(i18n) };
+    chapters.forEach(function (ch) {
+      if (!ch.test || !ch.test.questions) return;
+      var section = document.getElementById(ch.id);
+      if (!section) return;
+      ch.test.questions.forEach(function (q, idx) {
+        if (q.type !== "interactive") return;
+        var qId = ch.chapter + "-" + (idx + 1);
+        var qEl = section.querySelector('.q[data-id="' + cssEscape(qId) + '"]');
+        var mount = qEl ? qEl.querySelector(".interactive-mount") : null;
+        if (!mount) return;
+        BookViz.mountViz(mount, { code: q.code, slug: "q-" + qId }, ctx);
+      });
+    });
+  }
+
   // Attach answer/rationale from the chapter data to each .q before scoring, then score.
   function handleSubmit(form) {
     var chapterNum = form.getAttribute("data-chapter");
@@ -244,7 +303,17 @@
       if (qData.rationale) qEl.setAttribute("data-rationale", qData.rationale);
       // For short-answer, build the key-point checkboxes from data-key-points.
       ensureKeyPoints(qEl);
-      var e = BookScoring.scoreQuestion(qEl);
+      var qType = qEl.getAttribute("data-type");
+      var e;
+      if (qType === "interactive") {
+        // Score via the question's `check` code run against its mount container.
+        var mount = qEl.querySelector(".interactive-mount");
+        var spec = { check: qEl.getAttribute("data-interactive-check") };
+        var result = BookViz.runInteractiveCheck(mount, spec, { lang: state.lang, t: BookI18n.t.bind(BookI18n) });
+        e = result.earned;
+      } else {
+        e = BookScoring.scoreQuestion(qEl);
+      }
       earned += e;
       showFeedback(qEl, e, BookI18n);
       lockQuestion(qEl);
@@ -357,4 +426,10 @@
   }
   // For attribute values: same escaping, but used inside single or double quotes safely.
   function escAttr(s) { return escapeHtml(s); }
+  // Escape a string for safe use inside a CSS attribute selector [data-viz="..."].
+  // Slugs are kebab-case so this is mostly belt-and-suspenders, but quotes/backslashes
+  // would break the selector.
+  function cssEscape(s) {
+    return String(s == null ? "" : s).replace(/["\\\]]/g, "\\$&");
+  }
 })();

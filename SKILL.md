@@ -1,13 +1,15 @@
 ---
 name: personal-book-forger
-description: Forge a personalized, multi-file HTML learning book (with i18n) from a repo, a topic/domain, or external materials. Before writing each chapter, the skill asks the learner 2-3 scenario/code-understanding questions to gauge their level, then calibrates chapter depth and writes a chapter test (mixed question types, 80% soft-gate). Two goals: make the learner an expert of a DOMAIN, or an expert of a SPECIFIC REPO (onboarding chapters for DB schema, core services, data flow, etc.). Supports multiple languages (runtime switcher). Use whenever the user asks to turn a codebase, a subject area, documentation, or papers into a learnable book, course, tutorial, or study guide — even if they don't use the word "book". Triggers on phrasings like "make me a book on X", "turn this repo into something I can learn from", "create a course for me on Y", "build a study guide for Z from these docs", "onboard me to this repo".
+description: Forge a personalized, multi-file HTML learning book (with i18n and D3/SVG interactive visualizations) from a repo, a topic/domain, or external materials. Before writing each chapter, the skill asks the learner 2-3 scenario/code-understanding questions to gauge their level, then calibrates chapter depth and writes a chapter test (mixed question types including interactive D3 questions, 80% soft-gate). Two goals: make the learner an expert of a DOMAIN, or an expert of a SPECIFIC REPO (onboarding chapters for DB schema, core services, data flow, etc.). Supports multiple languages (runtime switcher). Use whenever the user asks to turn a codebase, a subject area, documentation, or papers into a learnable book, course, tutorial, or study guide — even if they don't use the word "book". Triggers on phrasings like "make me a book on X", "turn this repo into something I can learn from", "create a course for me on Y", "build a study guide for Z from these docs", "onboard me to this repo".
 ---
 
 # Personal Book Forger
 
-Forge a **multi-file HTML learning book with internationalization**, calibrated to the learner's actual level — not a generic reference. The book's source can be a repo, a topic/domain, external materials, or a combination. Two goals: make the learner an **expert of a domain**, or an **expert of a specific repo** (with onboarding chapters for DB schema, core services, data flow, etc.). The book can be authored in multiple languages (runtime language switcher). Each chapter has a test; reaching 80% means the chapter is "learned enough to move forward" (soft gate — never locks).
+Forge a **multi-file HTML learning book with internationalization and D3/SVG interactive visualizations**, calibrated to the learner's actual level — not a generic reference. The book's source can be a repo, a topic/domain, external materials, or a combination. Two goals: make the learner an **expert of a domain**, or an **expert of a specific repo** (with onboarding chapters for DB schema, core services, data flow, etc.). The book can be authored in multiple languages (runtime language switcher). Each chapter has a test; reaching 80% means the chapter is "learned enough to move forward" (soft gate — never locks).
 
 The defining behavior: **before writing each chapter, ask the learner 2–3 scenario/code-understanding questions, then write the chapter at a depth matched to what they actually know.** This is not optional and not a formality — it is the whole point of the skill.
+
+Visualizations (chapter-level diagrams/simulations/charts, and interactive D3 questions inside tests) are authored as raw D3 code in the chapter JSON and rendered by the template's `js/viz.js` runner. See `references/visualizations.md` for the full contract.
 
 ## How to use this skill
 
@@ -114,11 +116,17 @@ This is the heart of the skill. Run this loop once per chapter. **Do not pre-gen
 
 - Main explanation, at the depth chosen above
 - Code examples / source snippets — if the source is a repo, cite real file paths and line numbers. For `repo-expert` goal onboarding chapters, this is the core of the chapter: real schema files, real service entry points, real route handlers, with citations.
-- For onboarding chapters that involve relationships or flow (DB schema, data flow), include an **inline SVG diagram** (ER sketch, request-flow diagram). No external images.
+- **D3/SVG visualizations** when a concept is better shown than described. Add entries to the chapter's `viz[]` array — raw D3 code that renders into a container. Default to including a viz when:
+  - The chapter is about **relationships or structure** (DB schema → ER diagram, architecture → subsystem map, class relationships → inheritance graph).
+  - The chapter is about **flow or process** (request lifecycle → flow stepper, event ordering → sequence diagram, algorithm states → step-through simulation).
+  - The chapter is about **data or trade-offs** (latency distributions, complexity curves, benchmark comparisons → bar/line/scatter charts).
+  Use the chapter's `viz[]` array (append to body in order) or drop a `<div data-viz="<slug>"></div>` placeholder in `bodyHtml` for precise placement. Full authoring conventions and worked examples in `references/visualizations.md`.
 - Learning objectives list (refined from the outline draft)
 - Common pitfalls / contrasts with adjacent concepts / further reading
 
-**2e. Write the chapter test.** 8–15 questions mixing the three question types the learner asked for: multiple-choice, fill-in-the-blank / code-fill, and short-answer with self-checked key points. **Weight questions toward the points the assessment showed were weak.** Every question ships with its answer, a rationale, and an in-book anchor (the section id, e.g. `sec-ownership-rules` — anchors are language-neutral). Test design rules in `references/test-design.md`.
+**2e. Write the chapter test.** 8–15 questions mixing the available question types: multiple-choice, fill-in-the-blank / code-fill, short-answer with self-checked key points, and (when the interaction genuinely tests understanding a static question can't) **interactive D3 questions**. **Weight questions toward the points the assessment showed were weak.** Every question ships with its answer, a rationale, and an in-book anchor (the section id, e.g. `sec-ownership-rules` — anchors are language-neutral). Test design rules in `references/test-design.md`; the interactive type and the viz contract in `references/visualizations.md`.
+
+Use the `interactive` question type sparingly — only when the learner has to *do* something (trace a failure on a real diagram, reorder a pipeline, tune a value to meet a constraint) that a multiple-choice question couldn't test as well. Authoring an interactive question costs more than a static one; don't use it where it isn't earning its keep.
 
 After 2e, confirm with the learner before moving to the next chapter. They may ask you to revise this chapter's body or test.
 

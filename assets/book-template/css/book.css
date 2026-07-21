@@ -116,6 +116,54 @@ button.submit-test:disabled { background: var(--muted); cursor: not-allowed; }
 #boot-msg { padding: 2rem; color: var(--muted); font-family: monospace; }
 #boot-msg.error { color: var(--fail); }
 
+/* Visualizations (D3/SVG) */
+.viz-container {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden; /* let SVGs clip cleanly */
+}
+.viz-container svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  font-family: inherit;
+}
+.viz-container .viz-caption,
+.viz-caption {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-align: center;
+  font-style: italic;
+}
+.viz-container.viz-error {
+  background: #fee2e2;
+  border-color: var(--fail);
+  color: var(--fail);
+  font-size: 0.9rem;
+}
+.viz-container.viz-error strong { display: block; margin-bottom: 0.25rem; }
+.viz-container.viz-error .viz-error-detail {
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  word-break: break-word;
+}
+/* Interactive vizs inside questions get a touch more breathing room. */
+.q .interactive-mount { margin-top: 0.5rem; }
+/* Generic styles viz code can lean on for nodes/edges. */
+.viz-container .node { fill: var(--accent); }
+.viz-container .node-fail { fill: var(--fail); cursor: pointer; }
+.viz-container .node:hover { fill: #1d4ed8; }
+.viz-container .edge { stroke: var(--muted); stroke-width: 2; fill: none; }
+.viz-container .label { font-size: 13px; fill: var(--fg); }
+.viz-container .axis text { font-size: 11px; fill: var(--muted); }
+.viz-container .axis path,
+.viz-container .axis line { stroke: var(--border); }
+
 @media (max-width: 800px) {
   .layout { flex-direction: column; }
   nav#toc { position: static; width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border); }

@@ -13,19 +13,23 @@ Each chapter and each language lives in its own JSON file, loaded at runtime. Th
 ├── index.html              # shell: nav (TOC + lang switcher), dashboard, #app mount point
 ├── start.sh                # launches a static server and opens the browser
 ├── css/
-│   └── book.css            # all styles
+│   └── book.css            # all styles (includes .viz-container, .viz-error, responsive SVG)
 ├── js/
+│   ├── vendor/
+│   │   └── d3.min.js       # vendored D3 v7 (loaded before app scripts; no external requests)
 │   ├── i18n.js             # locale loader + t() lookup + language switch
 │   ├── scoring.js          # mcq/fill/short scoring (language-neutral)
 │   ├── dashboard.js        # TOC + progress + per-language score persistence
-│   └── main.js             # bootstrap: load locale + meta + chapters, render, wire events
+│   ├── viz.js              # visualization runner (mountViz, runInteractiveCheck, helpers)
+│   └── main.js             # bootstrap: load locale + meta + chapters, render, wire events,
+│                           #   mount chapter viz[] + interactive questions (set BOOK_SLUG here!)
 ├── locales/
-│   ├── en.json             # UI strings for English (set BOOK_SLUG in main.js!)
+│   ├── en.json             # UI strings for English
 │   └── <lang>.json         # one file per language, SAME key set
 └── content/
     └── <lang>/
         ├── meta.json       # book title, subtitle, ordered chapter manifest
-        ├── ch-01.json      # one chapter per file
+        ├── ch-01.json      # one chapter per file (may include a viz[] array)
         └── ch-XX.json
 ```
 
@@ -46,6 +50,9 @@ You almost never touch `index.html`, `css/`, or `js/`. You write:
   "objectives": ["objective 1", "objective 2"],
   "bodyHtml": "<p>Pre-rendered HTML, injected as-is.</p><section id=\"sec-ownership-rules\"><h3>…</h3><p>…</p></section>",
   "pitfallsHtml": "<p>Optional. Pitfalls, contrasts, further reading.</p>",
+  "viz": [
+    { "type": "diagram", "slug": "er-ownership", "caption": "Optional.", "code": "/* D3 code; see visualizations.md */" }
+  ],
   "test": {
     "passThreshold": 80,
     "questions": [ /* see below */ ]
@@ -55,6 +62,7 @@ You almost never touch `index.html`, `css/`, or `js/`. You write:
 
 - `bodyHtml` and `pitfallsHtml` are **trusted pre-rendered HTML** injected as-is. You author them. Use `<section id="sec-<slug>">` for subsections — the `id` is the anchor that test review links jump to.
 - Anchors are **language-neutral**: the same `sec-ownership-rules` id appears in `content/en/ch-03.json` and `content/zh/ch-03.json`. The prose differs; the id does not. (See `i18n.md`.)
+- `viz[]` is optional. Each entry's `code` is raw D3 JavaScript run at render time; see `references/visualizations.md` for the full contract. To place a viz at a specific spot in the body, leave a `<div data-viz="<slug>"></div>` placeholder in `bodyHtml` — otherwise vizs append to the body in array order.
 
 ## Question schemas
 
@@ -129,6 +137,22 @@ Add `"multiSelect": true`. Correct = all-and-only the options in `correct`.
 ```
 
 The key-point checkboxes are injected by `main.js` from `keyPoints` at submit time. The learner sees the honesty framing hint above the checklist (from `ui.self_check_hint` in the locale).
+
+### interactive (D3 visualization scored by interaction)
+
+```json
+{
+  "type": "interactive",
+  "prompt": "Click the node that fails when service B is down.",
+  "code": "/* D3 code rendering an interactive viz into the question's mount div */",
+  "check": "/* returns {passed, earned} given the mount div as `this` */",
+  "answer": "Revealed after submit.",
+  "rationale": "…",
+  "review": "sec-data-flow"
+}
+```
+
+`code` renders the viz; `check` scores the learner's interaction at submit time. Both are raw JS run via `new Function` with `this` = the mount div, `d3` and `helpers` in scope. Full guidance and worked examples in `references/visualizations.md`.
 
 ## Runtime flow (already implemented)
 
