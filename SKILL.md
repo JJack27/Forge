@@ -117,7 +117,7 @@ This is the heart of the skill. Run this loop once per chapter. **Do not pre-gen
 
 - Main explanation, at the depth chosen above
 - Code examples / source snippets — if the source is a repo, cite real file paths and line numbers. For `repo-expert` goal onboarding chapters, this is the core of the chapter: real schema files, real service entry points, real route handlers, with citations.
-- **Inline SVG diagrams** (`<figure class="diagram"><svg viewBox="…">…</svg><figcaption>…</figcaption></figure>`) when a concept is better shown than described. No external images, no D3, no `fetch()`. Use the theme colors (`#38e0d6`, `#6ee7ff`, `#34d399`, `#fbbf24`, `#f87171`, `#a78bfa`, `#aab0c0`, `#e8eaf0`, `#1d212c`/`#161922`). Default to including a diagram when:
+- **Inline SVG diagrams** (`<figure class="diagram"><svg viewBox="…">…</svg><figcaption>…</figcaption></figure>`) when a concept is better shown than described. No external images, no D3, no `fetch()`. The book has **light and dark themes** (reader toggles from the topbar) — diagrams must adapt to both, so take colors from the page's CSS variables via **style attributes** (SVG presentation attributes can't hold `var()`): `style="fill:var(--surface-2);stroke:var(--accent)"` for panels, `var(--fg)`/`var(--fg-dim)`/`var(--muted)` for text, `var(--accent)`/`var(--accent-2)`/`var(--pass)`/`var(--fail)`/`var(--warn)` for semantic emphasis. **Never hardcode hex colors in a diagram** — a dark panel or light text becomes invisible in the other theme. Default to including a diagram when:
   - The chapter is about **relationships or structure** (DB schema → ER diagram, architecture → subsystem map, class relationships → inheritance graph).
   - The chapter is about **flow or process** (request lifecycle → flow diagram, event ordering → sequence diagram, layering → stacked-panel diagram).
   - The chapter is about **a contrast or a taxonomy** (two designs side-by-side, three layers of detection, four question types) — side-by-side panels with a short caption beats a paragraph of prose.
@@ -140,7 +140,7 @@ Assemble every chapter (in the **primary language only** for now) into the multi
 - `<primary-lang>/assets/book.js` — add your book's demos to the `demos = {}` registry. Everything else (scoring, nav, dashboard) is already wired and shared verbatim across all language folders.
 - Rename the `en/` folder to your primary language code if it isn't English (`zh/`, `es/`, etc.).
 
-Don't touch `assets/style.css` or the scoring/nav/dashboard portions of `assets/book.js` — they're shared verbatim across all language folders and already wired.
+Don't touch `assets/style.css` or the scoring/nav/theme/dashboard portions of `assets/book.js` — they're shared verbatim across all language folders and already wired (the light/dark toggle button is auto-injected into the topbar; the `<head>` theme snippet from the template pages must be copied verbatim into every page).
 
 Test mechanics (all client-side, no backend — implemented in `assets/book.js`, scores via `data-*` attributes on each `<div class="q">`):
 
@@ -162,6 +162,7 @@ Full project layout, the chapter HTML anatomy, the `data-*` attribute schemas pe
 - Write the project directory to `./books/<book-slug>/` unless the learner specified otherwise.
 - Tell the learner:
   - **Just open `<primary-lang>/index.html` directly in a browser.** No server, no build step, no internet connection required — every chapter is fully self-contained HTML and works under `file://`.
+  - That the book has **light and dark themes** — the ☀/☾ toggle in the topbar switches (persisted in `localStorage`, defaults to the OS preference on first visit).
   - That progress and scores are saved in the browser's `localStorage`, per language.
   - How to switch languages: the `lang-toggle` link in the top-right of any page jumps to the parallel file in the other language's folder. (Other languages are added in Stage 4.5.)
   - How to re-take a test (button on each chapter).

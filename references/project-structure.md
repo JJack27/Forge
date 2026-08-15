@@ -16,8 +16,8 @@ Each chapter is fully self-contained: the `<head>` links to the shared styleshee
 │   ├── 02-…-slug.html
 │   └── …
 │   └── assets/
-│       ├── style.css                  ← dark-cyan theme (shared verbatim across languages)
-│       └── book.js                    ← scoring + nav + dashboard + demos registry (shared verbatim)
+│       ├── style.css                  ← light/dark theme via CSS vars (shared verbatim across languages)
+│       └── book.js                    ← scoring + nav + theme toggle + dashboard + demos registry (shared verbatim)
 └── <other-lang>/                      ← e.g. zh/, added in Stage 4.5
     ├── index.html
     ├── 01-…-slug.html
@@ -37,6 +37,8 @@ Every chapter mirrors the canonical reference at `assets/book-template/en/01-exa
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Chapter N — Title</title>
+<script>(function(){try{var t=localStorage.getItem("pbf:theme");if(t!=="light"&&t!=="dark"){t=(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches)?"light":"dark";}document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script>
+                                                  <!-- theme snippet: copy verbatim, do not translate -->
 <link rel="stylesheet" href="assets/style.css">  <!-- single stylesheet -->
 </head>
 <body>
@@ -103,6 +105,7 @@ Every chapter mirrors the canonical reference at `assets/book-template/en/01-exa
 ### Critical conventions
 
 - **`<html lang="…">`** matches the language folder (`en`, `zh-CN`, `es`, etc.).
+- **The `<head>` theme snippet** (see the anatomy above) applies the stored theme — or `prefers-color-scheme`, defaulting to dark — before first paint so the page never flashes the wrong theme. Copy it **verbatim** into every page of every language; do not translate or modify it.
 - **`<main class="chapter" data-chapter-n="N">`** — the `data-chapter-n` attribute tells `book.js` which chapter this is (drives prev/next nav + the `localStorage` key).
 - **Inline `<script>window.BOOK_CONFIG = …</script>`** — the same object on every page. `book.js` reads it (overriding its built-in defaults) to know the book's slug, lang, and ordered chapters list. At minimum set `slug` (kebab-case, unique per book), `lang` (matches the folder), and `chapters` (ordered list of `{n, slug}`).
 - **Section ids (`id="sec-…"`)** are language-neutral anchors that test `data-review` values point to. Don't translate them — the same id appears in every language's copy of the chapter.
@@ -218,13 +221,24 @@ A chapter references it via `<div class="demo" data-demo="myDemo">…</div>`. Th
 
 ## Inline SVG diagrams
 
-Pure inline SVG inside `<figure class="diagram"><svg viewBox="0 0 W H">…</svg><figcaption>…</figcaption></figure>`. No external images, no D3, no fetch. Use the theme colors (`#38e0d6`, `#6ee7ff`, `#34d399`, `#fbbf24`, `#f87171`, `#a78bfa`, `#aab0c0`, `#e8eaf0`, `#1d212c`/`#161922`). Always set `viewBox` so the SVG scales responsively; always include a `<figcaption>`.
+Pure inline SVG inside `<figure class="diagram"><svg viewBox="0 0 W H">…</svg><figcaption>…</figcaption></figure>`. No external images, no D3, no fetch. The book has **light and dark themes**, so diagrams must be theme-aware: take colors from the page's CSS variables via **style attributes** — SVG presentation attributes (`fill="#hex"`) cannot hold `var()`, but style attributes can:
+
+```html
+<rect … style="fill:var(--surface-2);stroke:var(--accent)" stroke-width="2"/>
+<text … style="fill:var(--accent)">LABEL</text>          <!-- emphasis -->
+<text … style="fill:var(--fg)">LABEL</text>              <!-- normal text -->
+<text … style="fill:var(--fg-dim)">caption</text>        <!-- secondary text -->
+<line  … style="stroke:var(--muted)"/>                   <!-- arrows, connectors -->
+```
+
+Available vars: `--surface`/`--surface-2` (panels), `--fg`/`--fg-dim`/`--muted` (text), `--accent`/`--accent-2` (emphasis), `--pass`/`--fail`/`--warn` (semantic). **Never hardcode hex colors in a diagram** — a dark panel or light text becomes invisible in the other theme. Always set `viewBox` so the SVG scales responsively; always include a `<figcaption>`.
 
 ## Runtime flow (already implemented in `assets/book.js`)
 
 1. Each page's inline `<script>window.BOOK_CONFIG = …</script>` overrides the defaults compiled into `book.js`.
 2. On `DOMContentLoaded` (or immediately if already loaded), `book.js` boots:
    - `initDemos()` — finds every `<div class="demo" data-demo="…">`, looks up the handler in `demos`, binds it.
+   - `initThemeToggle()` — injects the ☀/☾ button into `.topbar` (before `.lang-toggle`). Clicking flips `<html data-theme>` and persists the choice under the single `localStorage` key `pbf:theme` (shared across chapters and languages; the initial theme itself is applied pre-paint by the `<head>` snippet, not here).
    - `buildTocPage()` — no-op unless `.chapter-grid` exists (only on `index.html`). Renders one card per chapter from `CFG.chapters` + `window.CHAPTER_DESCS`, with status pills from `localStorage`.
    - If `<main class="chapter" data-chapter-n="N">` is present, `buildChapterNav(N)` fills `.topbar nav.chapter-nav` with prev / Contents / next links.
 3. On test submit: `book.js` scores each `<div class="q">` via its `data-*` attributes, shows feedback (verdict + answer + rationale + review link), saves the score to `localStorage` under `book:<slug>:<lang>:ch:<N>`, and re-renders the TOC/dashboard.

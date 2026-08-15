@@ -1,6 +1,7 @@
 /* Personal Book Forger — shared book JS.
    Handles: localStorage scoring, TOC/dashboard, per-chapter tests,
-   and a small registry of interactive demos used across chapters.
+   the light/dark theme toggle, and a small registry of interactive
+   demos used across chapters.
    Loaded from each chapter via <script src="assets/book.js" defer>.
 
    CONFIG: every page sets window.BOOK_CONFIG inline (in a <script> block
@@ -211,6 +212,44 @@
   }
 
   // ============================================================
+  // THEME (light/dark) — toggle button auto-injected into the topbar
+  // ============================================================
+  // The initial theme is applied BEFORE first paint by the tiny inline
+  // snippet in each page's <head> (stored choice, else prefers-color-scheme,
+  // else dark) so there is no flash of the wrong theme. Here we only inject
+  // the toggle button and flip the attribute on click. The choice persists
+  // in localStorage under a single book-agnostic key ("pbf:theme"), shared
+  // across chapters AND languages (a reader's theme preference is not
+  // per-language).
+  function currentTheme() {
+    return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+  }
+
+  function initThemeToggle() {
+    var topbar = document.querySelector(".topbar");
+    if (!topbar || topbar.querySelector(".theme-toggle")) return;
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "theme-toggle";
+    btn.setAttribute("aria-label", "Toggle light/dark theme");
+    function render() {
+      var light = currentTheme() === "light";
+      btn.textContent = light ? "☾" : "☀";
+      btn.title = light ? "Switch to dark theme" : "Switch to light theme";
+    }
+    btn.addEventListener("click", function () {
+      var next = currentTheme() === "light" ? "dark" : "light";
+      document.documentElement.setAttribute("data-theme", next);
+      try { localStorage.setItem("pbf:theme", next); } catch (e) { /* private mode */ }
+      render();
+    });
+    render();
+    // Sit before the lang-toggle when there is one, else at the bar's end.
+    var lang = topbar.querySelector(".lang-toggle");
+    topbar.insertBefore(btn, lang || null);
+  }
+
+  // ============================================================
   // TOC PAGE: build cards + dashboard
   // ============================================================
   function buildTocPage() {
@@ -302,6 +341,7 @@
   // ============================================================
   function boot() {
     initDemos();
+    initThemeToggle();
     buildTocPage(); // no-op if not on TOC page
     var chapterEl = document.querySelector("main.chapter");
     if (chapterEl) {

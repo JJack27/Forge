@@ -5,22 +5,26 @@
   Every chapter in the book mirrors this exact structure so the shared
   assets/book.js (scoring, nav, dashboard) works unchanged.
 
-  Anatomy:
-    1. <head> with the single stylesheet link
-    2. <div class="topbar"> with brand / crumb / chapter-nav / lang-toggle
-    3. <main class="chapter" data-chapter-n="N"> with the inline BOOK_CONFIG script
-    4. chapter-header (eyebrow / h1 / lede)
-    5. objectives box
-    6. <h2 id="sec-…"> subsections with prose / SVG diagrams / demos
-    7. recap + pitfalls
-    8. <form class="test"> with one <div class="q"> per question
-    9. closing <script src="assets/book.js" defer>
+Anatomy:
+  1. <head> with the theme snippet + the single stylesheet link
+  2. <div class="topbar"> with brand / crumb / chapter-nav / lang-toggle
+     (book.js injects the light/dark theme-toggle button next to lang-toggle)
+  3. <main class="chapter" data-chapter-n="N"> with the inline BOOK_CONFIG script
+  4. chapter-header (eyebrow / h1 / lede)
+  5. objectives box
+  6. <h2 id="sec-…"> subsections with prose / SVG diagrams / demos
+  7. recap + pitfalls
+  8. <form class="test"> with one <div class="q"> per question
+  9. closing <script src="assets/book.js" defer>
 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Chapter 1 — Example Chapter</title>
+<!-- Theme snippet: applies the stored theme (or prefers-color-scheme) BEFORE
+     first paint to avoid a flash. Copy verbatim into every page; do not translate. -->
+<script>(function(){try{var t=localStorage.getItem("pbf:theme");if(t!=="light"&&t!=="dark"){t=(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches)?"light":"dark";}document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script>
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -62,8 +66,8 @@
     Body prose goes here. Use <code>&lt;p&gt;</code> for paragraphs,
     <code>&lt;ul&gt;&lt;li&gt;</code> for lists, <code>&lt;strong&gt;</code> for
     emphasis, <code>&lt;code&gt;</code> for inline code, and
-    <code>&lt;pre&gt;&lt;code&gt;</code> for code blocks. The dark-cyan theme
-    styles all of these.
+    <code>&lt;pre&gt;&lt;code&gt;</code> for code blocks. The shared theme
+    (toggle light/dark from the topbar) styles all of these.
   </p>
 
   <p>
@@ -78,27 +82,32 @@
 
   <p>
     Diagrams are pure inline SVG inside a <code>&lt;figure class="diagram"&gt;</code>.
-    No external images, no D3, no fetch. Use the theme colors:
-    <code>#38e0d6</code> (cyan), <code>#6ee7ff</code> (light cyan),
-    <code>#34d399</code> (green), <code>#fbbf24</code> (amber),
-    <code>#f87171</code> (red), <code>#a78bfa</code> (purple),
-    <code>#aab0c0</code> (dim text), <code>#e8eaf0</code> (text),
-    <code>#1d212c</code>/<code>#161922</code> (panel bg). Always set
-    <code>viewBox</code> so the SVG scales; always include a
-    <code>&lt;figcaption&gt;</code>.
+    No external images, no D3, no fetch. Colors come from the page's CSS
+    variables — the book ships a light and a dark theme, and diagrams must
+    adapt to both. Because SVG presentation attributes
+    (<code>fill="…"</code>) cannot hold <code>var()</code>, set colors via
+    <strong>style attributes</strong>: <code>style="fill:var(--surface-2);
+    stroke:var(--accent)"</code>. Use <code>var(--surface-2)</code> for panel
+    fills, <code>var(--fg)</code>/<code>var(--fg-dim)</code>/<code>var(--muted)</code>
+    for text, and <code>var(--accent)</code> / <code>var(--accent-2)</code> /
+    <code>var(--pass)</code> / <code>var(--fail)</code> / <code>var(--warn)</code>
+    for semantic emphasis. Always set <code>viewBox</code> so the SVG scales;
+    always include a <code>&lt;figcaption&gt;</code>. Never hardcode hex colors
+    in a diagram — a hardcoded dark panel or light text becomes invisible in
+    the other theme.
   </p>
 
   <figure class="diagram">
     <svg viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Example diagram">
-      <rect x="20" y="20" width="160" height="60" rx="8" fill="#1d212c" stroke="#38e0d6" stroke-width="2"/>
-      <text x="100" y="55" text-anchor="middle" fill="#38e0d6" font-size="14" font-weight="700">CONCEPT A</text>
-      <line x1="180" y1="50" x2="240" y2="50" stroke="#7a8194" stroke-width="2"/>
-      <polygon points="240,50 232,46 232,54" fill="#7a8194"/>
-      <rect x="240" y="20" width="140" height="60" rx="8" fill="#1d212c" stroke="#34d399" stroke-width="2"/>
-      <text x="310" y="55" text-anchor="middle" fill="#34d399" font-size="14" font-weight="700">CONCEPT B</text>
-      <text x="200" y="120" text-anchor="middle" fill="#aab0c0" font-size="11" font-style="italic">A causes B</text>
+      <rect x="20" y="20" width="160" height="60" rx="8" style="fill:var(--surface-2);stroke:var(--accent)" stroke-width="2"/>
+      <text x="100" y="55" text-anchor="middle" style="fill:var(--accent)" font-size="14" font-weight="700">CONCEPT A</text>
+      <line x1="180" y1="50" x2="240" y2="50" style="stroke:var(--muted)" stroke-width="2"/>
+      <polygon points="240,50 232,46 232,54" style="fill:var(--muted)"/>
+      <rect x="240" y="20" width="140" height="60" rx="8" style="fill:var(--surface-2);stroke:var(--pass)" stroke-width="2"/>
+      <text x="310" y="55" text-anchor="middle" style="fill:var(--pass)" font-size="14" font-weight="700">CONCEPT B</text>
+      <text x="200" y="120" text-anchor="middle" style="fill:var(--fg-dim)" font-size="11" font-style="italic">A causes B</text>
     </svg>
-    <figcaption>An example diagram. Inline SVG, theme colors, viewBox + figcaption.</figcaption>
+    <figcaption>An example diagram. Inline SVG, CSS-variable colors (theme-aware), viewBox + figcaption.</figcaption>
   </figure>
 
   <h2 id="sec-demos">1.3 Interactive demos</h2>
