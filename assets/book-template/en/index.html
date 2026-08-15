@@ -3,8 +3,9 @@
   Dashboard / table-of-contents page.
   This is the entry point learners open. It shows progress across all chapters
   and links to each one. Structure:
-    1. <head> with the single stylesheet link
-    2. <div class="topbar"> with brand + tagline + lang-toggle (no chapter-nav on index)
+    1. <head> with the theme snippet + the single stylesheet link
+    2. <div class="topbar"> with brand + tagline + lang-toggle (no chapter-nav
+       on index; book.js injects the light/dark theme-toggle button)
     3. <main class="toc"> with toc-header, dashboard (progress bar), chapter-grid
     4. Two inline scripts BEFORE book.js: window.BOOK_CONFIG and window.CHAPTER_DESCS
     5. <script src="assets/book.js" defer> — fills the grid + dashboard
@@ -14,6 +15,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>My Book</title>
+<!-- Theme snippet: applies the stored theme (or prefers-color-scheme) BEFORE
+     first paint to avoid a flash. Copy verbatim into every page; do not translate. -->
+<script>(function(){try{var t=localStorage.getItem("pbf:theme");if(t!=="light"&&t!=="dark"){t=(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches)?"light":"dark";}document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","dark");}})();</script>
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>

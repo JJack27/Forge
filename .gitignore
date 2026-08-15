@@ -1,0 +1,5 @@
+# Local ZCode workspace state
+.zcode/
+
+# Skill-swap backup artifacts
+.backup-*.bundle
