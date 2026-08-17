@@ -1,4 +1,6 @@
-# personal-book-forger
+# Forge
+
+*Forge yourself into an expert.*
 
 A ZCode skill that forges a personalized, multi-file HTML learning book (one self-contained `.html` file per chapter, with inline SVG diagrams and a small per-book demo registry) from a repo, a topic/domain, or external materials — calibrated to the learner's actual level.
 
@@ -33,7 +35,7 @@ Every chapter is fully self-contained HTML and works under `file://`. Switch lan
 ## Files
 
 ```
-personal-book-forger/
+Forge/
 ├── SKILL.md                       # main workflow (the entry point)
 ├── references/
 │   ├── source-analysis.md         # how to extract structure from repo/topic/materials
@@ -49,8 +51,8 @@ personal-book-forger/
             ├── index.html         # dashboard shell (inline BOOK_CONFIG + CHAPTER_DESCS)
             ├── 01-example-chapter.html  # canonical chapter reference (all 4 question types, 1 SVG, 1 demo)
             └── assets/
-                ├── style.css      # dark-cyan theme (shared verbatim across languages)
-                └── book.js        # scoring + nav + dashboard + empty demos registry (shared verbatim)
+                ├── style.css      # light/dark theme via CSS vars (shared verbatim across languages)
+                └── book.js        # scoring + nav + theme toggle + dashboard + empty demos registry (shared verbatim)
 ```
 
 ## Installation
@@ -58,7 +60,7 @@ personal-book-forger/
 This skill is discovered from `~/.agents/skills/`. To install:
 
 ```bash
-cp -r personal-book-forger ~/.agents/skills/
+cp -r Forge ~/.agents/skills/
 ```
 
 Once installed, it triggers on requests like:
