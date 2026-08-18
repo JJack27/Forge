@@ -1,6 +1,6 @@
 # book-template
 
-The HTML-per-chapter template for the personal-book-forger skill. This is what
+The HTML-per-chapter template for the Forge skill. This is what
 Stage 3 of the skill copies to start a new book.
 
 ## Layout
