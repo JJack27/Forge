@@ -8,7 +8,7 @@ the `graph.js` script tag to omit). Reference implementation:
 [open-connector-book](https://github.com/JJack27/open-connector-book) (38
 concepts / 53 relations / 89 section references across zh + en).
 
-![Knowledge graph](../../assets/screenshots/knowledge-graph.png)
+![Knowledge graph](../../assets/screenshots/knowledge-graph-full.png)
 
 ## When to add it
 
