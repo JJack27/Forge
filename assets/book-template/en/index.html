@@ -6,9 +6,11 @@
     1. <head> with the theme snippet + the single stylesheet link
     2. <div class="topbar"> with brand + tagline + lang-toggle (no chapter-nav
        on index; book.js injects the light/dark theme-toggle button)
-    3. <main class="toc"> with toc-header, dashboard (progress bar), chapter-grid
+    3. <main class="toc"> with toc-header, dashboard (progress bar),
+       optional knowledge-graph section (.kg), chapter-grid
     4. Two inline scripts BEFORE book.js: window.BOOK_CONFIG and window.CHAPTER_DESCS
-    5. <script src="assets/book.js" defer> — fills the grid + dashboard
+    5. Cytoscape.js CDN scripts + <script src="assets/book.js" defer> (fills grid/dashboard)
+       + <script src="assets/graph.js" defer> (fills the .kg section, if present)
 -->
 <html lang="en">
 <head>
@@ -52,11 +54,37 @@
     </p>
   </div>
 
+  <!-- OPTIONAL: knowledge graph. Delete this section, the graph.js script
+       tag below, and assets/graph.js to omit the feature. Author the
+       concept data in assets/graph.js (DATA START/END markers). The two
+       view modes reuse the chapter-test localStorage records. -->
+  <section class="kg" id="knowledge-graph">
+    <div class="kg-head">
+      <div>
+        <h2>Knowledge Graph</h2>
+        <p>The book's core concepts and how they connect. <strong>Progress view</strong> lights up only the
+          concepts from chapters you've passed; <strong>Full map view</strong> shows the complete graph.
+          Click a node to see the chapters and sections that teach it; drag nodes, scroll to zoom.</p>
+      </div>
+      <div class="kg-toggle" role="group" aria-label="Switch graph view">
+        <button type="button" data-mode="progress">Progress</button>
+        <button type="button" data-mode="full">Full map</button>
+      </div>
+    </div>
+    <div class="kg-layout">
+      <div class="kg-stage"></div>
+      <aside class="kg-panel" aria-live="polite"></aside>
+    </div>
+    <div class="kg-legend"></div>
+  </section>
+
   <div class="chapter-grid"></div>
 
   <div class="toc-footer">
     Built with the <a href="https://github.com/your/repo">Forge</a> skill.
-    All diagrams are inline SVG; all demos run in your browser; no external requests.
+    All diagrams are inline SVG; all demos run in your browser.
+    The knowledge graph is rendered by Cytoscape.js from a CDN, with an automatic
+    built-in fallback when offline.
   </div>
 </main>
 
@@ -79,6 +107,14 @@ window.CHAPTER_DESCS = {
        desc: "The canonical chapter template. Every real chapter mirrors this structure." }
 };
 </script>
+<!-- Knowledge graph renderer (CDN, exact order matters: cytoscape →
+     layout-base → cose-base → cytoscape-fcose). If these fail to load
+     (offline), graph.js falls back to a built-in SVG layout. -->
+<script src="https://cdn.jsdelivr.net/npm/cytoscape@3.30.4/dist/cytoscape.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/layout-base@2.0.1/layout-base.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/cose-base@2.2.0/cose-base.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/cytoscape-fcose@2.2.0/cytoscape-fcose.min.js" defer></script>
 <script src="assets/book.js" defer></script>
+<script src="assets/graph.js" defer></script>
 </body>
 </html>
