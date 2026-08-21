@@ -348,6 +348,118 @@ button.submit-test:disabled { background: var(--muted); cursor: not-allowed; }
 
 .toc-footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 2rem; }
 
+/* ---------- Knowledge graph (index page, rendered by graph.js) ----------
+   Active only when index.html includes the .kg section. Cluster classes
+   c1..c4 are pre-wired to the four theme accents; if you rename or add
+   cluster keys in graph.js, mirror the change here (.kg-node.c<key> .dot,
+   .kg-chip.c<key>, .kg-lg .sw.c<key>). */
+.kg {
+  max-width: 980px; margin: 0 auto 2rem; padding: 1.4rem 1.5rem;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+}
+.kg-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.kg-head h2 { margin: 0 0 .25rem; font-size: 1.25rem; color: var(--accent); }
+.kg-head p { margin: 0; color: var(--fg-dim); font-size: .88rem; max-width: 560px; }
+.kg-toggle { display: inline-flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; flex: none; }
+.kg-toggle button {
+  border: none; background: transparent; color: var(--fg-dim); font: inherit;
+  font-size: .85rem; padding: .4rem .9rem; cursor: pointer;
+}
+.kg-toggle button + button { border-left: 1px solid var(--border); }
+.kg-toggle button:hover { color: var(--accent); }
+.kg-toggle button.active { background: var(--accent); color: var(--bg); font-weight: 600; }
+
+.kg-layout { display: flex; gap: 1.2rem; margin-top: 1.1rem; }
+.kg-stage {
+  flex: 1; min-width: 0; position: relative; height: 600px; overflow: hidden;
+  border: 1px solid var(--border); border-radius: 6px; background: var(--code-bg);
+}
+.kg-svg { display: block; width: 100%; height: 100%; touch-action: none; }
+.kg-offline-note {
+  position: absolute; top: .5rem; left: .5rem; z-index: 5;
+  font-size: .72rem; color: var(--warn); background: var(--surface);
+  border: 1px solid var(--warn); border-radius: 4px; padding: .15rem .5rem;
+}
+
+.kg-edge { stroke: var(--border); stroke-width: 1.2; transition: opacity .15s, stroke .15s; }
+.kg-edge.lit { stroke: var(--accent); opacity: .5; }
+
+.kg-node { cursor: pointer; outline: none; }
+.kg-node .dot { fill-opacity: .16; stroke-width: 1.6; transition: fill-opacity .2s, stroke .2s; }
+.kg-node.c1 .dot { stroke: var(--accent);   fill: var(--accent); }
+.kg-node.c2 .dot { stroke: var(--accent-2); fill: var(--accent-2); }
+.kg-node.c3 .dot { stroke: var(--pass);     fill: var(--pass); }
+.kg-node.c4 .dot { stroke: var(--warn);     fill: var(--warn); }
+.kg-node text { fill: var(--fg-dim); font-size: 11px; paint-order: stroke; stroke: var(--code-bg); stroke-width: 3px; stroke-linejoin: round; }
+.kg-node.st-current .dot { fill-opacity: .06; stroke-dasharray: 4 3; }
+.kg-node.st-new { opacity: .55; }
+.kg-node.st-new .dot { stroke: var(--border); fill: transparent; stroke-dasharray: 3 3; }
+.kg-node.st-new text { fill: var(--muted); }
+.kg-node.selected .dot { stroke-width: 2.8; }
+.kg-node.selected text { fill: var(--fg); font-weight: 600; }
+.kg-node:focus-visible .dot { stroke-width: 2.8; }
+.kg-node .halo { fill: none; stroke: var(--warn); stroke-width: 1.4; opacity: 0; }
+.kg-node.is-next .halo { animation: kg-pulse 2s ease-in-out infinite; }
+@keyframes kg-pulse {
+  0%, 100% { opacity: 0; transform: scale(.6); }
+  50% { opacity: .85; transform: scale(1); }
+}
+.kg-svg.focusing .kg-node.dimmed,
+.kg-svg.focusing .kg-edge.dimmed { opacity: .12; }
+.kg-svg.focusing .kg-node.adjacent text { fill: var(--fg); }
+.kg-svg.focusing .kg-node { transition: opacity .15s; }
+
+.kg-panel { flex: none; width: 300px; font-size: .88rem; }
+.kg-panel-hint h3 { margin: .2rem 0 .4rem; font-size: 1rem; }
+.kg-panel-hint p { color: var(--fg-dim); margin: 0 0 .8rem; }
+.kg-counts { color: var(--muted); font-size: .8rem; margin-top: .8rem; }
+.kg-chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+.kg-chip {
+  display: inline-block; font-size: .72rem; padding: .12rem .55rem;
+  border-radius: 999px; border: 1px solid var(--border); color: var(--fg-dim);
+}
+.kg-chip.c1 { border-color: var(--accent);   color: var(--accent); }
+.kg-chip.c2 { border-color: var(--accent-2); color: var(--accent-2); }
+.kg-chip.c3 { border-color: var(--pass);     color: var(--pass); }
+.kg-chip.c4 { border-color: var(--warn);     color: var(--warn); }
+.kg-node-head h3 { margin: .35rem 0 .3rem; font-size: 1.05rem; }
+.kg-desc { color: var(--fg-dim); margin: 0 0 .9rem; }
+.kg-refs-title {
+  font-size: .75rem; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); font-weight: 700; margin-bottom: .4rem;
+}
+.kg-ref-group { margin-bottom: .8rem; }
+.kg-ref-head { display: flex; align-items: center; gap: .4rem; margin-bottom: .25rem; }
+.kg-ref-head strong { font-size: .82rem; }
+.kg-ref-head .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); flex: none; }
+.kg-ref-head .dot.pass { background: var(--pass); }
+.kg-ref-head .dot.fail { background: var(--warn); }
+.kg-ref-state { margin-left: auto; font-size: .72rem; color: var(--muted); }
+.kg-ref {
+  display: block; padding: .3rem .5rem; margin: .15rem 0; border-radius: 4px;
+  border: 1px solid var(--border); color: var(--fg); font-size: .82rem; line-height: 1.45;
+}
+.kg-ref:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+
+.kg-legend { display: flex; flex-wrap: wrap; gap: .9rem; margin-top: .8rem; font-size: .78rem; color: var(--fg-dim); }
+.kg-lg { display: inline-flex; align-items: center; gap: .35rem; }
+.kg-lg .sw { width: 10px; height: 10px; border-radius: 50%; flex: none; box-sizing: border-box; }
+.kg-lg .sw.learned { background: var(--accent); border: 2px solid var(--accent); }
+.kg-lg .sw.current { border: 2px dashed var(--accent); }
+.kg-lg .sw.new { border: 2px dashed var(--border); }
+.kg-lg .sw.next { border: 2px solid var(--warn); animation: kg-pulse 2s ease-in-out infinite; }
+.kg-lg .sw.c1 { background: var(--accent); }
+.kg-lg .sw.c2 { background: var(--accent-2); }
+.kg-lg .sw.c3 { background: var(--pass); }
+.kg-lg .sw.c4 { background: var(--warn); }
+
+@media (max-width: 860px) {
+  .kg-layout { flex-direction: column; }
+  .kg-stage { height: 440px; }
+  .kg-panel { width: auto; }
+  .kg-head p { max-width: none; }
+}
+
 /* ---------- Helpers ---------- */
 .kbd {
   background: var(--code-bg); border: 1px solid var(--border); border-bottom-width: 2px;

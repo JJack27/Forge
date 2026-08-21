@@ -42,6 +42,7 @@ The result is a real **book you own**: static HTML files on your disk, no server
 | 📄 **Self-contained HTML** | one `.html` file per chapter + an `index.html` dashboard. No server, no build, no internet — works straight from `file://` |
 | ✏️ **Inline SVG diagrams** | ER sketches, flow diagrams, architecture maps — drawn, not described. Pure SVG, still works offline |
 | 🕹️ **Interactive demos** | small per-book widgets (a hash-stability demo, a token slider, a step-by-step loop printer) |
+| 🧠 **Knowledge graph** *(optional)* | concept map on the dashboard — progress view lights concepts as you pass chapter tests, full view shows the end-state map; click a node to deep-link to the chapters & sections that teach it. Cytoscape.js CDN renderer with an automatic offline fallback |
 | ✅ **Chapter tests** | mixed multiple-choice (single + multi), fill-in/code-fill, and short-answer with self-check |
 | 🔁 **80% soft gate** | fail nothing is locked — wrong answers highlight and link to the exact section to re-read |
 | 🌍 **Multi-language** | `en/`, `zh/`, `ja/`… parallel sibling folders; switch language with a single link, no runtime switcher |

@@ -43,6 +43,7 @@ digraph forger {
   "3. Assemble multi-file project" [shape=box];
   "4. Deliver (primary) + explain usage" [shape=box];
   "4.5. Translate into other languages" [shape=doublecircle];
+  "5. Post-delivery enhancement loop" [shape=box, style=dashed];
 
   "0. Analyze source(s)" -> "0.5. Ask: languages + goal";
   "0.5. Ask: languages + goal" -> "1. Propose outline + get approval";
@@ -57,6 +58,7 @@ digraph forger {
   "3. Assemble multi-file project" -> "4. Deliver (primary) + explain usage";
   "4. Deliver (primary) + explain usage" -> "4.5. Translate into other languages" [label="other langs selected"];
   "4. Deliver (primary) + explain usage" -> "4.5. Translate into other languages" [label="done if no others", style=invis];
+  "4.5. Translate into other languages" -> "5. Post-delivery enhancement loop" [label="learner asks for more", style=dashed];
 }
 ```
 
@@ -138,6 +140,7 @@ Assemble every chapter (in the **primary language only** for now) into the multi
 - `<primary-lang>/index.html` — set the dashboard title/subtitle, the inline `window.BOOK_CONFIG` (slug + lang + chapters list), and `window.CHAPTER_DESCS` (title + one-line description per chapter, dashboard-only).
 - `<primary-lang>/01-…-slug.html … 0N-…-slug.html` — one self-contained HTML file per chapter. Copy `01-example-chapter.html` as the canonical reference; mirror its structure exactly (topbar, inline `BOOK_CONFIG`, chapter-header, objectives, `sec-*` subsections, recap, pitfalls, `<form class="test">`). The same inline `window.BOOK_CONFIG` object appears on every page.
 - `<primary-lang>/assets/book.js` — add your book's demos to the `demos = {}` registry. Everything else (scoring, nav, dashboard) is already wired and shared verbatim across all language folders.
+- `<primary-lang>/assets/graph.js` — *(optional)* the index-page **knowledge graph** ships wired in the template. Author the concept data between the `DATA START/END` markers (concepts, domain clusters, per-chapter section refs); the engine, styles, and CDN tags are ready. Delete the `.kg` section in `index.html` and the script tags to omit the feature. Authoring pipeline + verification checklist in `references/knowledge-graph.md`.
 - Rename the `en/` folder to your primary language code if it isn't English (`zh/`, `es/`, etc.).
 
 Don't touch `assets/style.css` or the scoring/nav/theme/dashboard portions of `assets/book.js` — they're shared verbatim across all language folders and already wired (the light/dark toggle button is auto-injected into the topbar; the `<head>` theme snippet from the template pages must be copied verbatim into every page).
@@ -179,6 +182,21 @@ For each additional language the learner selected at Stage 0.5 (after the primar
 5. Tell the learner the language is ready and ask whether to continue to the next selected language.
 
 Full translation guidance (what to translate, what to leave, how to keep the invariant) in `references/i18n.md`.
+
+### Stage 5 — Post-delivery enhancement loop (optional)
+
+Books are regenerable, and learners come back with asks ("show me how it all
+connects", "add a dark mode", "graph my progress"). Treat each enhancement as
+a small feature loop: **explore the delivered project → design → implement →
+verify in a browser (language × theme × progress-state matrix) → refresh the
+README + screenshots**. Keep the project's conventions — zero build step,
+`file://` must keep working, assets byte-identical across language folders —
+and prefer enhancing the shipped template so the next book inherits it.
+
+Shipped enhancement: the **knowledge graph** (Stage 3 bullet above). When the
+learner asks for it post-delivery, follow `references/knowledge-graph.md` end
+to end — it contains the anchor-extraction pipeline, the data schema, the
+Cytoscape CDN script-order gotcha, and the full verification matrix.
 
 ## Style and tone
 
