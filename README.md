@@ -21,7 +21,7 @@ Works with any agent that loads skills from `~/.agents/skills/`.
 4. **Draws, doesn't describe** — architecture maps, ER sketches, and sequence flows as pure inline SVG in the theme's palette.
 5. **Ships runnable demos** — small per-book widgets (a CSRF attack simulator, a token slider, a step-by-step loop printer) that run in the page.
 6. **Maps the knowledge** *(optional)* — a concept graph on the dashboard: concepts light up as you pass chapter tests, and clicking a node deep-links to the exact sections that teach it.
-7. **Tests every chapter** — mixed multiple-choice (single + multi), fill-in, and short-answer with self-check; **≥ 80% = learned enough to move forward**.
+7. **Tests every chapter** — single-select and multi-select multiple-choice plus fill-in/code-fill; **≥ 80% = learned enough to move forward**.
 8. **Fails softly** — wrong answers highlight with a "review this section" link to the exact anchor; nothing locks, retake anytime.
 9. **Tracks progress** — scores and chapter status persist in `localStorage`, per book *and* per language.
 10. **Speaks your languages** — `en/`, `zh/`, `ja/`, … as parallel sibling folders; switching language is a hyperlink, no runtime switcher.
@@ -232,7 +232,7 @@ Forge/
 4. **画图，而不是描述** —— 架构图、ER 草图、时序/流程图，全部用主题配色的内联 SVG。
 5. **内置可运行的 demo** —— 每本书自己的小交互组件（CSRF 攻击模拟器、token 滑块、逐步循环打印机），在页面里直接跑。
 6. **知识图谱**（可选）—— 仪表盘上的概念图：通过的章节会点亮对应概念；点击节点直达讲解它的章节小节。
-7. **每章都有测试** —— 单选、多选、填空、简答自评混合；**≥ 80% 即视为学会**。
+7. **每章都有测试** —— 单选、多选、填空/代码填空；**≥ 80% 即视为学会**。
 8. **温和的失败** —— 答错高亮并附"复习本节"直达链接；不锁任何内容，随时重测。
 9. **进度持久化** —— 成绩与章节状态存在 `localStorage`，按书、按语言分别记录。
 10. **多语言** —— `en/`、`zh/`、`ja/`… 平行目录；切换语言就是一个链接，无需运行时切换器。

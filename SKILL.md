@@ -129,7 +129,7 @@ This is the heart of the skill. Run this loop once per chapter. **Do not pre-gen
 
 **Honest scope (especially for `repo-expert`).** If the source is a repo, read the **actual files** (source, patches, code) — not just the README and docs. Where the docs describe an aspirational design that the committed code doesn't fully implement, flag it explicitly in the chapter and probe it in the test. A reader who trusts the doc will credit the implementation for guarantees it doesn't provide; the book's job is to be more trustworthy than the doc. This is often the most valuable thing the book can do.
 
-**2e. Write the chapter test.** 8–15 questions mixing the three available question types: multiple-choice (single-select and multi-select), fill-in-the-blank / code-fill, and short-answer with self-checked key points. **Weight questions toward the points the assessment showed were weak.** Every question ships with its answer, a rationale, and an in-book anchor (the section id, e.g. `sec-ownership-rules` — anchors are language-neutral). Test design rules in `references/test-design.md`.
+**2e. Write the chapter test.** 8–15 questions mixing the three available question types: single-select multiple-choice, multi-select multiple-choice, and fill-in-the-blank / code-fill. **Weight questions toward the points the assessment showed were weak.** Every question ships with its answer, a rationale, and an in-book anchor (the section id, e.g. `sec-ownership-rules` — anchors are language-neutral). Test design rules in `references/test-design.md`.
 
 After 2e, confirm with the learner before moving to the next chapter. They may ask you to revise this chapter's body or test.
 
@@ -149,7 +149,6 @@ Test mechanics (all client-side, no backend — implemented in `assets/book.js`,
 
 - **Multiple-choice** (`data-type="mcq"`) — single-select by default; add `data-multiselect="true"` for checkbox multi-select. Correct options in `data-correct='["b"]'` (JSON array, single-quoted).
 - **Fill-in-the-blank / code-fill** (`data-type="fill"`) — normalized string comparison (trim, lowercase, collapse whitespace). Accepted answers in `data-accepted='["ans1","ans2"]'`. Multi-blank is order-tolerant.
-- **Short-answer** (`data-type="short"`) — key-point checklist in `data-key-points='["p1","p2",…]'`, self-checked by the learner; score = (checked points) / (total points). The honesty framing ("only check a point if you actually addressed it — cheating here only hurts you") is built into the template.
 - Every question also carries `data-answer` (revealed reference answer), `data-rationale` (why), and `data-review="sec-…"` (the section anchor the "review this section" link jumps to).
 
 Scoring and the 80% rule (implemented in `assets/book.js`):
@@ -176,9 +175,9 @@ Full project layout, the chapter HTML anatomy, the `data-*` attribute schemas pe
 For each additional language the learner selected at Stage 0.5 (after the primary-language book is delivered and approved):
 
 1. Copy the entire `<primary-lang>/` folder → `<newlang>/` (e.g. `en/` → `zh/`). Copy the `assets/` subfolder verbatim — `book.js` and `style.css` are identical across languages.
-2. For each chapter HTML file: translate the prose (chapter title, eyebrow, lede, objectives, body paragraphs, list items, table cells, figcaptions, box content, test prompts/answers/rationales/key-points). **Do NOT translate**: code blocks, file paths, HTML tags/attributes, section ids (`sec-…`), `data-correct`/`data-accepted` values that are code symbols, `data-review` values, the `window.BOOK_CONFIG` script block (except flip `lang: "en"` → `lang: "zh"`).
+2. For each chapter HTML file: translate the prose (chapter title, eyebrow, lede, objectives, body paragraphs, list items, table cells, figcaptions, box content, test prompts/answers/rationales). **Do NOT translate**: code blocks, file paths, HTML tags/attributes, section ids (`sec-…`), `data-correct`/`data-accepted` values that are code symbols, `data-review` values, the `window.BOOK_CONFIG` script block (except flip `lang: "en"` → `lang: "zh"`).
 3. On every file in the new folder: change `<html lang="en">` → `<html lang="<newlang>">`, and flip the `lang-toggle` link to point back at the primary language (`href="../en/…"` with text like `→ English`).
-4. Verify the i18n invariant: same section ids, same question count per chapter, same `data-correct`/`data-accepted` for code-symbol answers, same `data-review` anchors, same `data-key-points` count. (See "Verifying the project" in `references/project-structure.md` for the script.)
+4. Verify the i18n invariant: same section ids, same question count per chapter, same `data-correct`/`data-accepted` for code-symbol answers, same `data-review` anchors. (See "Verifying the project" in `references/project-structure.md` for the script.)
 5. Tell the learner the language is ready and ask whether to continue to the next selected language.
 
 Full translation guidance (what to translate, what to leave, how to keep the invariant) in `references/i18n.md`.

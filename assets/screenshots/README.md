@@ -1,8 +1,9 @@
 # Screenshots
 
-All shots are captured with Playwright (2× retina) from the reference book
+All shots are captured with Playwright (2× retina). Most come from the reference book
 [open-connector-book](https://github.com/JJack27/open-connector-book) — 13
-chapters on gateway architecture and OAuth, `en` + `zh` sibling folders. The
+chapters on gateway architecture and OAuth, `en` + `zh` sibling folders;
+`test-result.png` comes from the template's own example chapter. The
 README references them by these filenames.
 
 | File | What it shows | How it was captured |
@@ -14,7 +15,7 @@ README references them by these filenames.
 | `chapter-diagram.png` | Inline SVG diagram: request lifecycle through gateway layers | chapter 1, second `figure.diagram` |
 | `interactive-demo.png` | Interactive CSRF demo mid-run: scenario radios + rejection output | chapter 6, ran both scenarios via `button[data-run]` |
 | `test-feedback.png` | Wrong MCQ answer: red ✗ block, correct answer, rationale, "review this section" link | chapter 6 test, answered Q2 wrong, submitted |
-| `test-result.png` | 56% "Below 80%" banner + retake button + self-checked short answer | same submission, cropped Q8 → retake button |
+| `test-result.png` | 33% "Below 80%" banner + retake button | template example chapter test, answered Q1 correct + Q2/Q3 wrong, submitted |
 
 Tips for re-capturing:
 

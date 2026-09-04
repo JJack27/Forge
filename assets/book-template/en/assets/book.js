@@ -75,13 +75,6 @@
       var matched = accepted.filter(function (a) { return vals.indexOf(a) >= 0; });
       return (allFilled && noDup && matched.length === vals.length) ? 1 : 0;
     }
-    if (type === "short") {
-      var kpBox = q.querySelector(".key-points");
-      var checks = kpBox ? kpBox.querySelectorAll('input[type="checkbox"]') : [];
-      if (!checks.length) return 0;
-      var checked = Array.prototype.filter.call(checks, function (c) { return c.checked; }).length;
-      return checks.length ? checked / checks.length : 0;
-    }
     return 0;
   }
 
@@ -101,21 +94,6 @@
     fb.innerHTML = html;
   }
 
-  function ensureKeyPoints(q) {
-    if (q.getAttribute("data-type") !== "short") return;
-    var kpBox = q.querySelector(".key-points");
-    if (!kpBox || kpBox.querySelector('input[type="checkbox"]')) return;
-    var points = JSON.parse(q.getAttribute("data-key-points") || "[]");
-    points.forEach(function (p, i) {
-      var lbl = document.createElement("label");
-      var cb = document.createElement("input");
-      cb.type = "checkbox"; cb.setAttribute("data-kp", i);
-      lbl.appendChild(cb);
-      lbl.appendChild(document.createTextNode(" " + p));
-      kpBox.appendChild(lbl);
-    });
-  }
-
   function lockQuestion(q) {
     Array.prototype.forEach.call(q.querySelectorAll("input, textarea"), function (el) { el.disabled = true; });
   }
@@ -125,7 +103,6 @@
     var questions = form.querySelectorAll(".q");
     var total = questions.length, earned = 0;
     Array.prototype.forEach.call(questions, function (q) {
-      ensureKeyPoints(q);
       var e = scoreQuestion(q);
       earned += e;
       showFeedback(q, e);
@@ -179,12 +156,6 @@
     if (e.target.classList && e.target.classList.contains("retake-btn")) {
       var form = e.target.closest("form.test");
       if (form) resetTest(form);
-    }
-  });
-  document.addEventListener("focusin", function (e) {
-    if (e.target.classList && e.target.classList.contains("short")) {
-      var q = e.target.closest(".q");
-      if (q) ensureKeyPoints(q);
     }
   });
 

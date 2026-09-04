@@ -8,7 +8,7 @@ How to write each chapter's test (Stage 2e): question count, types, scoring, the
 
 ## Question types
 
-Three types. Use a mix; don't make a test all one type.
+Three types: single-select multiple-choice, multi-select multiple-choice, and fill-in-the-blank. Use a mix; don't make a test all one type.
 
 ### 1. Multiple-choice
 
@@ -21,32 +21,17 @@ Three types. Use a mix; don't make a test all one type.
 
 - A sentence or code snippet with one or more blanks.
 - **Provide a small set of accepted answers per blank** — equivalent phrasings, alternate identifiers, with/without trailing punctuation. The frontend normalizes (trim, collapse whitespace, case-insensitive) unless the answer is genuinely case-sensitive (e.g. an API name).
-- **Avoid blanks with many valid free-form answers.** If you can't list the acceptable answers, it's not a fill-in — make it a short-answer instead.
+- **Avoid blanks with many valid free-form answers.** If you can't list the acceptable answers, it's not a fill-in — rephrase it as a multiple-choice question instead.
 - Code-fill: make sure the blank has exactly one syntactic/semantic completion. `const x: ___ = 5` is bad (i32? usize? inferred?). `let x: &str = ___;` where the surrounding code forces a `&'static str` is good.
-
-### 3. Short-answer with self-checked key points
-
-This is the type that most rewards understanding and most resists gaming. Structure:
-
-- Pose the question (e.g. "In your own words: why does this design fail under condition Z, and what's the standard fix?").
-- The learner writes a free-form answer in a textarea.
-- On submit, reveal the **reference answer as a checklist of key points** (3–6 bullets). E.g.:
-  - [ ] identifies that the failure is caused by X
-  - [ ] names the underlying mechanism (Y rule)
-  - [ ] proposes the standard fix (Z pattern)
-  - [ ] notes the trade-off the fix introduces
-- The learner self-checks each point: "only check a point if you actually addressed it — under-checking hurts the book's calibration, over-checking only fools yourself." Score for the question = (checked points) / (total points).
-- This honesty framing matters. Put it above every short-answer checklist, not buried in help text.
 
 ## Where test data lives
 
-Each chapter's test lives **inline in the chapter HTML** as `<form class="test" data-chapter="N">` with one `<div class="q" …>` per question. The question data is in `data-*` attributes on each `.q` div (`data-type`, `data-correct`/`data-accepted`/`data-key-points`, `data-answer`, `data-rationale`, `data-review`); the shared `assets/book.js` reads them at submit time. No JSON content files.
+Each chapter's test lives **inline in the chapter HTML** as `<form class="test" data-chapter="N">` with one `<div class="q" …>` per question. The question data is in `data-*` attributes on each `.q` div (`data-type`, `data-correct`/`data-accepted`, `data-answer`, `data-rationale`, `data-review`); the shared `assets/book.js` reads them at submit time. No JSON content files.
 
 The **scoring logic is language-neutral** (it reads the `data-*` attributes off the rendered DOM), so when you translate a chapter:
 
 - Keep the same number of questions, same types, same order.
 - Keep `data-correct` (mcq value tokens) and `data-accepted` (fill, when the answer is a code symbol) **identical across languages**.
-- Keep the `data-key-points` count identical for short-answer questions.
 - Keep `data-review` values (section ids) identical — they're language-neutral anchors.
 
 See `references/i18n.md` for the full invariant and the verification script.
@@ -69,15 +54,14 @@ This is what makes the test a real gate rather than a generic quiz: if the learn
 For each `<div class="q">`, set these `data-*` attributes (the shared `book.js` reads them at submit time):
 
 - `data-id` — stable within the chapter (e.g. `1-1`, `1-2`), used for review navigation
-- `data-type` — `mcq` | `fill` | `short`
+- `data-type` — `mcq` | `fill`
 - `data-correct` (mcq only) — JSON array of correct option values, e.g. `'["b"]'` (single) or `'["a","c"]'` (multi). Add `data-multiselect="true"` for checkbox mode.
 - `data-accepted` (fill only) — JSON array of acceptable normalized answers, e.g. `'["ownership","borrowing"]'`
-- `data-key-points` (short only) — JSON array of checklist items, e.g. `'["identifies X","names mechanism Y"]'`
 - `data-answer` — the canonical correct answer / explanation, revealed after submit
 - `data-rationale` — one or two sentences on *why* this is the answer; for partial-credit cases, why each distractor is wrong
 - `data-review` — a section id for re-study, e.g. `sec-borrow-checker-rules`. The frontend renders this as "→ review this section" and the link jumps to that `id` in the same chapter.
 
-The question prompt and options are plain HTML inside the `.q` div (a `<div class="prompt">` with `<span class="qnum">Q1.</span>` prefix, then `<label class="opt">` options for mcq, `<input type="text" class="fill">` for fill, `<textarea class="short">` for short). Full anatomy and worked examples in `references/project-structure.md`.
+The question prompt and options are plain HTML inside the `.q` div (a `<div class="prompt">` with `<span class="qnum">Q1.</span>` prefix, then `<label class="opt">` options for mcq, `<input type="text" class="fill">` for fill). Full anatomy and worked examples in `references/project-structure.md`.
 
 ## Soft-gate behavior (do not lock)
 

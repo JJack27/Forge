@@ -272,18 +272,6 @@ input[type="text"].fill {
   border: 1px solid var(--border); background: var(--code-bg); color: var(--fg);
   border-radius: 4px; font-size: .95rem;
 }
-textarea.short {
-  width: 100%; min-height: 110px; padding: .6rem .7rem; font-family: inherit;
-  border: 1px solid var(--border); background: var(--code-bg); color: var(--fg);
-  border-radius: 4px; font-size: .95rem; resize: vertical;
-}
-.key-points { margin-top: .7rem; display: none; }
-.key-points.shown { display: block; }
-.key-points .hint {
-  font-size: .85rem; color: var(--warn); font-style: italic; margin-bottom: .5rem;
-  padding: .4rem .6rem; background: var(--tint-warn); border-radius: 4px;
-}
-.key-points label { display: block; padding: .3rem 0; color: var(--fg-dim); }
 .feedback { margin-top: .8rem; padding: .8rem 1rem; border-radius: 4px; display: none; font-size: .95rem; }
 .feedback.shown { display: block; }
 .feedback.correct { background: var(--tint-pass); border-left: 3px solid var(--pass); }
