@@ -113,7 +113,7 @@ Every chapter mirrors the canonical reference at `assets/book-template/en/01-exa
 
 ## Test question schemas
 
-Three types. Every question is a `<div class="q" …>` inside `<form class="test">`.
+Three types: single-select mcq, multi-select mcq, and fill. Every question is a `<div class="q" …>` inside `<form class="test">`.
 
 ### mcq (single-select)
 
@@ -158,25 +158,6 @@ Add `data-multiselect="true"`, use checkboxes, all-and-only correct for the poin
 ```
 
 For multi-blank, add multiple `<input type="text" class="fill">` elements. Scoring is order-tolerant: each filled value must be in `accepted`, no duplicates, all filled.
-
-### short (self-checked key points)
-
-```html
-<div class="q" data-id="1-4" data-type="short"
-     data-key-points='["point 1","point 2","point 3","point 4"]'
-     data-answer="Reference answer: …"
-     data-rationale="…"
-     data-review="sec-…">
-  <div class="prompt"><span class="qnum">Q4.</span> In your own words: …?</div>
-  <textarea class="short" placeholder="Your answer…"></textarea>
-  <div class="key-points">
-    <div class="hint">Only check a point if you actually addressed it — under-checking hurts the book's calibration, over-checking only fools yourself.</div>
-  </div>
-  <div class="feedback"></div>
-</div>
-```
-
-The key-point checkboxes are injected by `book.js` at submit time (or on first focus of the textarea) from `data-key-points`. Score = (checked) / (total).
 
 ## Index page (`index.html`) — the dashboard
 
@@ -258,8 +239,8 @@ for lang in */; do
       rid=$(echo "$r" | sed 's/data-review=/id=/')
       grep -qF "$rid" "$f" || echo "DANGLING review in $f: $r"
     done
-    # 2. Every data-correct / data-accepted / data-key-points is valid JSON
-    for attr in data-correct data-accepted data-key-points; do
+    # 2. Every data-correct / data-accepted is valid JSON
+    for attr in data-correct data-accepted; do
       grep -oE "$attr='[^']*'" "$f" | sed "s/$attr='//;s/'$//" | while read -r json; do
         echo "$json" | python3 -c "import json,sys; json.loads(sys.stdin.read())" 2>/dev/null \
           || echo "BAD JSON in $f: $attr='$json'"

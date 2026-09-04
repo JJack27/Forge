@@ -148,8 +148,8 @@ Anatomy:
   </div>
 
   <!-- ====================== TEST ====================== -->
-  <!-- One <div class="q"> per question. Four types: mcq (single), mcq multi-select,
-       fill, short. Every question has data-answer, data-rationale, data-review. -->
+  <!-- One <div class="q"> per question. Three types: mcq (single),
+       mcq multi-select, fill. Every question has data-answer, data-rationale, data-review. -->
   <form class="test" data-chapter="1">
     <h2>Chapter 1 Test</h2>
 
@@ -188,20 +188,6 @@ Anatomy:
          data-review="sec-demos">
       <div class="prompt"><span class="qnum">Q3.</span> Fill the blank: interactive demos are backed by a handler in the <code>demos</code> registry in <code>______</code>.</div>
       <input type="text" class="fill">
-      <div class="feedback"></div>
-    </div>
-
-    <!-- Short: data-key-points is a JSON array of checklist items. Self-checked via checkboxes injected at submit. -->
-    <div class="q" data-id="1-4" data-type="short"
-         data-key-points='["the structure is identical so the shared book.js works unchanged","section ids are language-neutral anchors for review links","diagrams are inline SVG; demos are backed by a registry in book.js","tests use data-* attributes that book.js scores"]'
-         data-answer="Every chapter mirrors the same structure (topbar, inline BOOK_CONFIG, chapter-header, objectives, sec-* subsections, recap, pitfalls, test form) so the shared book.js scores tests and builds nav without per-chapter logic. Section ids are language-neutral; diagrams are inline SVG; demos live in a registry in book.js."
-         data-rationale="If you got 'identical structure' + 'language-neutral ids' + 'inline SVG / demo registry' + 'data-* scoring', you've got the template."
-         data-review="sec-recap">
-      <div class="prompt"><span class="qnum">Q4.</span> In your own words: why does every chapter mirror the same structure, and what are the four key conventions?</div>
-      <textarea class="short" placeholder="Your answer…"></textarea>
-      <div class="key-points">
-        <div class="hint">Only check a point if you actually addressed it — under-checking hurts the book's calibration, over-checking only fools yourself.</div>
-      </div>
       <div class="feedback"></div>
     </div>
 
